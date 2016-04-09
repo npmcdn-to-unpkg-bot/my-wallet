@@ -1,0 +1,9 @@
+# Application config files
+
+config/
+
+# Server-application dependencies
+
+node_modules/
+
+# IDE and Other issues
