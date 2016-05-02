@@ -2,7 +2,7 @@
   "name": "mywallet-server",
   "version": "1.0.0",
   "description": "Server application to MyWallet Money Controll App",
-  "main": "mywallet-server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/maxandriani/my-wallet#readme",
   "dependencies": {
+    "client-sessions": "^0.7.0",
     "express": "^4.13.4",
-    "node-mysql": "^0.4.2"
+    "mysql": "^2.10.2"
   }
 }
