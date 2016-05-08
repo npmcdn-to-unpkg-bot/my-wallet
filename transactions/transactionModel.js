@@ -23,7 +23,7 @@ var transactionFacotry = function( data ){
         ammount: data.transaction_ammount,
         description: data.transaction_description,
         wallet: walletModel.factory( data ),
-        list: listModel.facotry( data )
+        list: listModel.factory( data )
     };
 };
 

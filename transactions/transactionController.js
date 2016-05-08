@@ -89,7 +89,7 @@ module.exports = {
         }
     },
     delete: function(req, res, next){
-        json.use(res);
-        json.build();
+        json.use(res)
+            .build({});
     }
 };

@@ -7,12 +7,6 @@
  * Json Formater should padronze the json communications
  */
 
-var response = {
-    status: 200,
-    message: 'Sucess',
-    data: {}
-};
-
 var responseBody = {
     json: function(){}
 };
@@ -20,20 +14,33 @@ var responseBody = {
 module.exports = {
     use: function(res){
         responseBody = res;
+        return this;
     },
     build: function(data, status, message){
+        
+        var res = {
+            status: 200,
+            message: 'Sucess',
+            data: {}
+        };
+        
         if (typeof data !== 'undefined'){
-            response.data = data;
+            res.data = data;
         }
         
         if (typeof status === 'number'){
-            response.status = status;
+            res.status = status;
         }
         
         if (typeof message !== 'undefined'){
-            response.message = message;
+            res.message = message;
+        } else {
+            if (res.status > 200 && typeof res.data.message !== 'undefined'){
+                res.message = res.data.message;
+            }
         }
         
-        responseBody.json(response);
+        responseBody.status(res.status);
+        responseBody.json(res);
     }
 };
