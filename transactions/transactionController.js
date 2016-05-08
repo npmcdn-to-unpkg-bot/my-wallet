@@ -7,8 +7,29 @@
  * Manage the transaction behaviour
  */
 
-//var transactionModel = require(global.pathTo('/transactions/transactionModel.js'));
+// Requires
+var transactionModel = require(global.pathTo('/transactions/transactionModel.js'));
 var json = require(global.pathTo('/json/jsonFormater.js'));
+
+// TODO Remove this
+var id = 0;
+var randonTransactionBuilder = function(){
+    var data = {};
+    data.transaction_id = ++id;
+    data.transaction_date = (new Date().getTime() - ( 2000*id ));
+    if (Math.ceil(Math.random())){
+        data.transaction_ammount = (Math.random()*100);
+    } else {
+        data.transaction_ammount = -1 * (Math.random()*100);
+    }
+    data.transaction_description = 'Uma transação qualquer';
+    data.wallet_id = 1;
+    data.wallet_name = "Carteira 1";
+    data.list_id = 1;
+    data.list_name = "Lista padrão";
+    
+    return transactionModel.factory( data );
+};
 
 /*
  * Public methods
@@ -27,34 +48,15 @@ module.exports = {
                 pages: 10
             },
             transactions: [
-                {
-                    id: 1,
-                    date: (new Date().getTime() - 2000),
-                    ammount: 59.45,
-                    description: 'Recebimento de fulano de tal',
-                    wallet: {
-                        id: 1,
-                        name: "Carteira 1"
-                    },
-                    list: {
-                        id: 1,
-                        name: "Temporada 2016"
-                    }
-                },
-                {
-                    id: 2,
-                    date: (new Date().getTime() - 5000),
-                    ammount: -29.45,
-                    description: 'Recebimento de fulano de tal',
-                    wallet: {
-                        id: 1,
-                        name: "Carteira 1"
-                    },
-                    list: {
-                        id: 1,
-                        name: "Temporada 2016"
-                    }
-                }
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder(),
+                randonTransactionBuilder()
             ]
         });
         
@@ -64,9 +66,7 @@ module.exports = {
     },
     get: function(req, res, next){
         json.use(res);
-        json.build({
-            
-        });
+        json.build(randonTransactionBuilder());
         
         if (next){
             next();
@@ -74,9 +74,7 @@ module.exports = {
     },
     save: function(req, res, next){
         json.use(res);
-        json.build({
-            
-        });
+        json.build(randonTransactionBuilder());
         
         if (next){
             next();
@@ -84,12 +82,14 @@ module.exports = {
     },
     new: function(req, res, next){
         json.use(res);
-        json.build({
-            
-        });
+        json.build(randonTransactionBuilder());
         
         if (next){
             next();
         }
+    },
+    delete: function(req, res, next){
+        json.use(res);
+        json.build();
     }
 };

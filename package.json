@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Server application to MyWallet Money Controll App",
   "main": "index.js",
-  "scripts": {"start": "node index.js",
+  "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,8 +23,10 @@
   "homepage": "https://github.com/maxandriani/my-wallet#readme",
   "dependencies": {
     "client-sessions": "^0.7.0",
+    "crypto-js": "^3.1.6",
     "express": "^4.13.4",
     "fs-extra": "^0.30.0",
-    "mysql": "^2.10.2"
+    "mysql": "^2.10.2",
+    "validator": "^5.2.0"
   }
 }
