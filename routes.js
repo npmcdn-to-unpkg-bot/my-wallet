@@ -8,7 +8,7 @@
  */
 
 //var contentController = require(global.pathTo('/content/contentController.js'));
-//var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
+var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
 //var walletControler = require(global.pathTo('/transactions/walletController.js'));
 //var listControler = require(global.pathTo('/transactions/listController.js'));
 //var userControler = require(global.pathTo('/transactions/userController.js'));
@@ -29,7 +29,7 @@ function routeSetup(app, express){
     /*
      * Transactions
      */
-    
+    app.get(/api\/transactions(?:\/)?(?:page\/([\d]+)\/?)?/, transactionControler.list);
     
     /*
      * Wallets
