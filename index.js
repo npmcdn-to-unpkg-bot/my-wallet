@@ -10,36 +10,41 @@
  * @author: mandriani
  */
 
+var path = require('path');
+
+global.config = require('./config/config.js');
+// Fix Path problem
+global.pathTo = function( uri ){
+    return path.normalize(path.resolve(__dirname) + uri);
+};
+
 var express = require('express');
 var app = express();
-// var session = require('client-sessions');
 
-// Fix the path problem
-global.path = __dirname;
+var routes = require(global.pathTo('/routes.js'));
+
+var session = require('client-sessions');
 
 // Change the session managment to Mozilla
-//app.use(session({
-//  cookieName: 'session',
-//  secret: 'Jhonny Be Goodie',
-//  duration: 30 * 60 * 1000,
-//  activeDuration: 5 * 60 * 1000
-//}));
+app.use(session({
+  cookieName: global.config.SESSION_COOKIE,
+  secret: global.config.SESSION_SECRET,
+  duration: global.config.SESSION_DURATION,
+  activeDuration: global.config.SESSION_LIFETIME
+}));
 
 /**
  * Routing ...
  */
+routes.use(app, express);
 
-// Static
-app.use('/client-app', express.static(__dirname + '/client-app/'));
-
-// Angular app
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/client-app/restrict.html');
-});
-
-var server = app.listen(80, function () {
+/**
+ * Server starting
+ */
+var server = app.listen(global.config.SERVER_PORT, function () {
     var host = server.address().address;
     var port = server.address().port;
 
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('[INFO] My Wallet server is running at http://%s:%s', host, port);
 });
+
