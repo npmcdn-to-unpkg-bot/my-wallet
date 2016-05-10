@@ -74,10 +74,7 @@ function routeSetup(app, express){
      */
     app.get('/api/*', function(req, res, next){
         jsonResponse.use(res);
-        jsonResponse.build({
-            key: 'ERROR_API_ROUTE_NOT_FOUND',
-            message: "Rota não encontrada"
-        }, 500);
+        jsonResponse.buildError(new Error('ERROR_API_ROUTE_NOT_FOUND'), 500);
         
         if (next){
             next();

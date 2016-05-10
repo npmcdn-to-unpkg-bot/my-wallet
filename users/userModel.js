@@ -318,7 +318,19 @@ Users.prototype.find = function( find, next ){
     query += ';';
     
     // Do the magic
-    db.query( query, next );
+    db.query( query, function(err, data, fields){
+        if (err){
+            next(err);
+            return;
+        }
+        
+        var userList = [];
+        for(var x in data){
+            userList.push(new User(data[x]));
+        }
+        
+        next(false, userList);
+    });
 };
 
 /**
@@ -346,7 +358,18 @@ Users.prototype.getUserById = function( user_id, next ){
             'Limit 1;';
     
     // Do the magic
-    db.query( query, next );
+    db.query( query, function(err, user){
+        if (err){
+            next(err);
+            return;
+        }
+        
+        if (user){
+            next(false, user);
+        } else {
+            next( new Error('404: ERROR_USER_NOT_FOUND') );
+        }
+    });
 };
 
 /**

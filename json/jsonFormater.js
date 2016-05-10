@@ -11,6 +11,46 @@ var responseBody = {
     json: function(){}
 };
 
+var ERROR = {
+    ERROR_API_ROUTE_NOT_FOUND: "Rota não encontrada"
+};
+
+ERROR.prototype.get = function( eNum ){
+    if (typeof this[eNum] !== 'undefined'){
+        return this[eNum];
+    } else {
+        return eNum;
+    }
+};
+
+ERROR.prototype.parser = function( err ){
+    var errorReg = /(?:([\d]+):\s+)?([\w]+)/;
+    var parsed = errorReg.exec( err.message );
+    
+    if (parsed.length == 2) {
+        return {
+            key: parsed[1],
+            code: 500,
+            message: this.get(parsed[1])
+        };
+    } else {
+        return {
+            key: parsed[2],
+            code: parsed[1],
+            message: parsed[2]
+        };
+    }
+};
+ERROR.prototype.key = function( err ){
+    return this.parser(err).key;
+};
+ERROR.prototype.code = function( err ){
+    return this.parser(err).code;
+};
+ERROR.prototype.build = function( err ){
+    return this.parser(err);
+};
+
 module.exports = {
     use: function(res){
         responseBody = res;
@@ -42,5 +82,15 @@ module.exports = {
         
         responseBody.status(res.status);
         responseBody.json(res);
+    },
+    buildError: function(err){
+        /*
+         * {
+         *     key: 'ERROR_API_ROUTE_NOT_FOUND',
+         *     message: "Rota não encontrada"
+         * }
+         */
+        
+        this.build(ERROR.build(err), ERROR.code(err));
     }
 };

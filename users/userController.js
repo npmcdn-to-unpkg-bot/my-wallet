@@ -10,6 +10,7 @@
 // Requires
 var userModel = require(global.pathTo('/users/userModel.js'));
 var json = require(global.pathTo('/json/jsonFormater.js'));
+var validate = require('validator');
 
 // TODO Remove this
 var id = 0;
@@ -27,12 +28,29 @@ var randonUserBuilder = function(){
  */
 module.exports = {
     get: function(req, res, next){
-        json.use(res);
-        json.build(randonRandonBuilder());
+        try {
+            // User is
+            var userId = req.param(0);
+
+            if (!validate.isNumeric(userId)){
+                throw new Error('ERROR_INVALID_USER_ID');
+            }
+            
+            userModel.findUserById( userId, function(err, user){
+                json.use(res);
+                
+                if (err){
+                    json.buildError(err);
+                } else {
+                    json.build( user );
+                }
+            });
+            
+        } catch (err) {
+            json.use(res);
+            json.buildError(err);
+        };
         
-        if (next){
-            next();
-        }
     },
     save: function(req, res, next){
         json.use(res);
