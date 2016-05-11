@@ -36,24 +36,83 @@ User.prototype.delete = function( next ){
     try{
         // Load DB
         var db = require(global.pathTo('/db/dbModel.js'));
-        var query = 'Delete From '+
-                        'transactions,'+
-                        'wallets,'+
-                        'lists,'+
-                        'auth,'+
-                        'users'+
-                    'Using '+
-                        'transactions, wallets, lists, auth, users '+
-                    'Where'+
-                        'transactions.wallet_id = wallets.id And'+
-                        'transactions.list_id = lists.id And'+
-                        'wallets.user_id = users.id And'+
-                        'lists.user_id = users.id And'+
-                        'auth.user_id = users.id And'+
-                        'users.id = 1;';
-                
-        // Do the Magic
-        db.query( query, next );
+        var removeTransactionsQuery, removeWalletsQuery, removeListsQuery, removeAuthQuery, removeUserQuery;
+        var userId = this.user_id;
+        
+        removeTransactionsQuery = 
+                'Delete From '+
+                    'transactions '+
+                'Where '+
+                    'transactions.wallet_id in '+
+                        '(Select wallets.id From wallets Where wallets.user_id = ?) Or '+
+                    'transactions.list_id in '+
+                        '(Select lists.id From lists Where lists.user_id = ?);';
+        removeWalletsQuery =
+                'Delete From '+
+                    'wallets '+
+                'Where '+
+                    'wallets.user_id = ?;';
+        removeListsQuery = 
+                'Delete From '+
+                    'lists '+
+                'Where '+
+                    'lists.user_id = ?;';
+        removeAuthQuery = 
+                'Delete From '+
+                    'auth '+
+                'Where '+
+                    'auth.user_id = ?;';
+        removeUserQuery = 
+                'Delete From '+
+                    'users '+
+                'Where '+
+                    'users.id = ?;';
+        
+        // Callbacks
+        var removeTransactions = function(){
+            db.query( removeTransactionsQuery, [userId], removeWallets );
+        };
+        
+        var removeWallets = function(err){
+            if (err){
+                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_TRANSACTIONS'));
+                return;
+            }
+            db.query( removeWalletsQuery, [userId], removeLists );
+        };
+        
+        var removeLists = function(err){
+            if (err){
+                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_WALLETS'));
+                return;
+            }
+            db.query( removeListsQuery, [userId], removeAuth );
+        };
+        
+        var removeAuth = function(err){
+            if (err){
+                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_LISTS'));
+                return;
+            }
+            db.query( removeAuthQuery, [userId], removeUser );
+        };
+        
+        var removeUser = function(err){
+            if (err){
+                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_AUTH'));
+                return;
+            }
+            db.query( removeUserQuery, function(err){
+                if (err){
+                    next(new Error('ERROR_FAILURE_ON_REMOVE_USER'));
+                } else {
+                    next(false);
+                }
+            });
+        };
+        
+        // Do the Magic Start recurvive callbacks
+        removeTransactions();
         
     } catch (e) {
         next(e);
@@ -70,18 +129,17 @@ User.prototype.delete = function( next ){
 User.prototype.save = function( next ){
     try{
         var _self = this;
-        // Load db
         var db = require(global.pathTo('/db/dbModel.js'));
         
         // Update basic user's info
         var updateInfo = function(){
             var query = 'Update users '+
                             'Set '+
-                                'name = \''+_self.user_name+'\', '+
+                                'name = \'?\' '+
                         'Where '+
-                            'users.id = \''+_self.user_id+'\' '+
+                            'users.id = \'?\' '+
                         'Limit 1;';
-            db.query( query, function(err){
+            db.query( query, [_self.user_name, _self.user_id], function(err){
                if (err){
                    next(err);
                    return;
@@ -94,11 +152,11 @@ User.prototype.save = function( next ){
         
         // Update primary email
         var checkPrimaryEmail = function(){
-            var checkQuery = 'Select auth.id From auth as a Where '+
-                                'a.email=\''+_self.user_email+'\' And '+
-                                'a.user_id!=\''+_self.user_id+'\' Limit 1;';
+            var checkQuery = 'Select a.id From auth as a Where '+
+                                'a.email=\'?\' And '+
+                                'a.user_id!=\'?\' Limit 1;';
             
-            _self.query( checkQuery, function(err, data){
+            db.query( checkQuery, [_self.user_email, _self.user_id], function(err, data){
                 if (err){
                     next(err);
                     return;
@@ -110,10 +168,10 @@ User.prototype.save = function( next ){
         
         var updatePrimaryEmail = function(){
             var updateQuery = 'Update auth '+
-                              'Set auth.email = \''+_self.user_email+'\' '+
-                              'Where auth.isPrimary=1 And auth.user_id=\''+_self.user_id+'\' Limit 1;';
+                              'Set auth.email = \'?\' '+
+                              'Where auth.is_primary=1 And auth.user_id=\'?\' Limit 1;';
             
-            db.query( updateQuery, function(err, data){
+            db.query( updateQuery, [_self.user_email, _self.user_id], function(err, data){
                next(err); 
             });
         };
@@ -142,9 +200,9 @@ User.prototype.changePass = function( passwd, next ){
         
         passwd_hash = sha1.encrypt(passwd, global.config.SESSION_SECRET);
         
-        var query = 'Update users Set password=\''+passwd_hash+'\' Limit 1;';
+        var query = 'Update users Set password=\'?\' Limit 1;';
         
-        db.query( query, next );
+        db.query( query, [passwd_hash], next );
     } catch(err) {
         next(err);
     }
@@ -168,32 +226,42 @@ User.prototype.addAccount = function( account, next ){
     try{
         var db = require(global.pathTo('/db/dbModel.js'));
         var query = 'Insert Into auth (auth_type_id, user_id, email,';
+        var values = [];
+        
+        values.push(account.type);
+        values.push(this.user_id);
+        values.push(account.email);
         
         if (typeof account.secret !== 'undefined'){
             query += ' auth_key,';
+            values.push(account.secret);
         }
         if (typeof account.token !== 'undefined'){
             query += ' auth_token,';
+            values.push(account.token);
+        }
+        if (typeof account.is_primary !== 'undefined'){
+            query += ' is_primary,';
+            values.push(account.is_primary);
         }
         
         query = query.slice(0,-1);
-        query += ') Values (';
-        
-        query += ' '+account.type+',';
-        query += ' '+this.user_id+',';
-        query += ' \''+account.email+'\',';
+        query += ") Values (?, ?, '?',";
         
         if (typeof account.secret !== 'undefined'){
-            query += ' \''+account.secret+'\',';
+            query += " '?',";
         }
         if (typeof account.token !== 'undefined'){
-            query += ' \''+account.token+'\',';
+            query += " '?',";
+        }
+        if (typeof account.is_primary !== 'undefined'){
+            query += " '?',";
         }
         
         query = query.slice(0,-1);
         query += ');';
         
-        db.query( query, next );
+        db.query( query, values, next );
     } catch (err) {
         next(err);
     }
@@ -210,16 +278,17 @@ User.prototype.addAccount = function( account, next ){
 User.prototype.setPrimary = function( email, next ){
     try{
         var db = require(global.pathTo('/db/dbModel.js'));
-        var queryReset = 'Update auth Set auth.primary = 0 Where auth.primary = 1 And auth.user_id = \''+this.user_id+'\' Limit 1;';
-        var queryUpdate = 'Update auth Set auth.primary = 1 Where email=\''+email+'\' And auth.user_id = '+this.user_id+' Limit 1;';
+        var userId = this.user_id;
+        var queryReset = 'Update auth Set auth.primary = 0 Where auth.primary = 1 And auth.user_id = \'?\' Limit 1;';
+        var queryUpdate = 'Update auth Set auth.primary = 1 Where email=\'?\' And auth.user_id = ? Limit 1;';
         
-        db.query( queryReset, function(err){
+        db.query( queryReset, [userId], function(err){
             if (err){
                 next(err);
             }
             
             // Reset is OK
-            db.query( queryUpdate, next );
+            db.query( queryUpdate, [email, userId], next );
         });
         
     } catch(err) {
@@ -251,6 +320,7 @@ Users.prototype.find = function( find, next ){
     
     var db = require(global.pathTo('/db/dbModel.js'));
     var query;
+    var values = [];
     
     if (typeof find.search === 'undefined'){
         find.search = null;
@@ -269,24 +339,6 @@ Users.prototype.find = function( find, next ){
     }
     
     // Start tu build query
-    /*
-    Select 
-	u.id as user_id,
-        u.name as user_name,
-        a.email as user_email
-    From 
-            users as u
-    Left Join
-        auth as a On a.user_id = u.id And a.is_primary = 1 
-    Left Join
-        auth_types as at On at.id = a.auth_type_id
-    Where
-            u.name Like '%string%' And 
-        #u.password = 'string' And 
-        a.email = 'string' 
-    Order By u.name ASC
-    Limit 0, 9;
-     */
     query = 'Select '+
                 'u.id as user_id,'+
                 'u.name as user_name,'+
@@ -301,8 +353,10 @@ Users.prototype.find = function( find, next ){
         var nameString = find.search.replace(/\s/g, '%');
         var emailString = find.search;
         query += 'Where ';
-        query += " u.name Like '%{nameString}'";
-        query += " a.email = '{emailString}'";
+        query += " u.name Like '%?%'";
+        values.push(nameString);
+        query += " a.email = '?'";
+        values.push(emailString);
     } else {
         // List all
         // Nothing to do
@@ -312,13 +366,14 @@ Users.prototype.find = function( find, next ){
     query += ' Order By u.name Asc';
     
     // Pagination
-    query += ' Limit' + (find.page * 9) + ', 9';
+    query += ' Limit ?, 9';
+    values.push((find.page * 9));
     
     // End query
     query += ';';
     
     // Do the magic
-    db.query( query, function(err, data, fields){
+    db.query( query, values, function(err, data, fields){
         if (err){
             next(err);
             return;
@@ -354,18 +409,18 @@ Users.prototype.getUserById = function( user_id, next ){
             'Left Join '+
                 'auth as a On a.user_id And a.is_primary = 1 '+
             'Where '+
-                "u.is = user_id "+
+                "u.id = ? "+
             'Limit 1;';
     
     // Do the magic
-    db.query( query, function(err, user){
+    db.query( query, [user_id], function(err, user){
         if (err){
             next(err);
             return;
         }
         
-        if (user){
-            next(false, user);
+        if (user.length == 1){
+            next(false, new User(user[0]));
         } else {
             next( new Error('404: ERROR_USER_NOT_FOUND') );
         }
@@ -402,23 +457,57 @@ Users.prototype.getUserByEmail = function( user_email, next ){
  */
 Users.prototype.insertUser = function( user_data, next ){
     var db = require(global.pathTo('/db/dbModel.js'));
-    var query;
+    var checkQuery;
+    var checkValues = [];
+    var insertQuery;
+    var insertValues = [];
     
-    query = 'Insert Into '+
-                'users '+
-                    '(name, password) '+
-            'Values '+
-                "('user_data.user_name', 'user_data.password');";
+    checkQuery = 'Select '+
+                    'u.id as user_id, '+
+                    'u.name as user_name, '+
+                    'a.email as user_email '+
+                 'From '+
+                    'auth as a '+
+                 'Left Join '+
+                    'users as u On u.id = a.user_id '+
+                 'Where '+
+                    'a.email = \'?\' Limit 1;';
+    checkValues.push(user_data.user_email);
     
-    db.query( query, function(err, data, fields){
+    insertQuery = 'Insert Into '+
+                    'users '+
+                        '(name, password) '+
+                    'Values '+
+                        "('?', '?');";
+    insertValues.push(user_data.user_name);
+    insertValues.push(user_data.password);
+    
+    var afterCheck = function(err, data, fields){
+        if (err){
+            next(err);
+            return;
+        }
+        
+        if (data.length == 0){
+            // Insert User
+            db.query( insertQuery, afterInsert );
+        } else {
+            next(new Error('ERROR_USER_ALREADY_EXISTS'));
+        }
+    };
+    
+    var afterInsert = function(err, data, fields){
         if (err){
             next(err);
         }
         
-        var user = new User(data);
+        user_data.user_id = data.insertId;
+        
+        var user = new User(user_data);
         var account = {
-            email: data.user_email,
-            type: 1
+            email: user_data.user_email,
+            type: 1,
+            is_primary: 1
         };
         
         user.addAccount( account , function(err){
@@ -428,7 +517,11 @@ Users.prototype.insertUser = function( user_data, next ){
             
             next(false, user);
         });
-    });
+    };
+    
+    // Check
+    db.query( checkQuery, afterCheck);
+    
 };
 
 /**
