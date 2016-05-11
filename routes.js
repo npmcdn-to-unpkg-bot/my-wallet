@@ -14,7 +14,7 @@ var listControler = require(global.pathTo('/lists/listController.js'));
 var userControler = require(global.pathTo('/users/userController.js'));
 var sessionControler = require(global.pathTo('/sessions/sessionController.js'));
 
-var jsonResponse = require(global.pathTo('/json/jsonFormater.js'));
+var JsonResponse = require(global.pathTo('/json/jsonFormater.js'));
 
 
 function routeSetup(app, express){
@@ -52,7 +52,7 @@ function routeSetup(app, express){
     app.get(/api\/lists\/([\d]+)(?:\/)?/, listControler.get);
     app.post(/api\/lists\/([\d]+)(?:\/)?/, listControler.save);
     app.post(/api\/lists\/new(\/)?/, listControler.new);
-    app.get(/api\/lists\/delete\/([\d]+)(\/)?/, listControler.delete);
+    app.post(/api\/lists\/delete\/([\d]+)(\/)?/, listControler.delete);
     app.get(/api\/lists(?:\/)?(?:page\/([\d]+)\/?)?/, listControler.list);
     
     /*
@@ -61,7 +61,7 @@ function routeSetup(app, express){
     app.get(/api\/users\/([\d]+)(?:\/)?/, userControler.get);
     app.post(/api\/users\/([\d]+)(?:\/)?/, userControler.save);
     app.post(/api\/users\/new(\/)?/, userControler.new);
-    app.get(/api\/users\/delete\/([\d]+)(\/)?/, userControler.delete);
+    app.post(/api\/users\/delete\/([\d]+)(\/)?/, userControler.delete);
     
     /*
      * Sessions
@@ -73,7 +73,7 @@ function routeSetup(app, express){
      * Default
      */
     app.get('/api/*', function(req, res, next){
-        jsonResponse.use(res);
+        var jsonResponse = new JsonResponse(res);
         jsonResponse.buildError(new Error('ERROR_API_ROUTE_NOT_FOUND'), 500);
         
         if (next){

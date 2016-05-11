@@ -20,10 +20,9 @@ global.pathTo = function( uri ){
 
 var express = require('express');
 var app = express();
-
 var routes = require(global.pathTo('/routes.js'));
-
 var session = require('client-sessions');
+var bodyParser = require('body-parser');
 
 // Change the session managment to Mozilla
 app.use(session({
@@ -32,6 +31,12 @@ app.use(session({
   duration: global.config.SESSION_DURATION,
   activeDuration: global.config.SESSION_LIFETIME
 }));
+
+// parse application/x-www-form-urlencoded 
+app.use(bodyParser.urlencoded({ extended: false }))
+ 
+// parse application/json 
+app.use(bodyParser.json())
 
 /**
  * Routing ...
