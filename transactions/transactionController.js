@@ -9,7 +9,7 @@
 
 // Requires
 var transactionModel = require(global.pathTo('/transactions/transactionModel.js'));
-var json = require(global.pathTo('/json/jsonFormater.js'));
+var JsonFormater = require(global.pathTo('/json/jsonFormater.js'));
 
 // TODO Remove this
 var id = 0;
@@ -36,7 +36,7 @@ var randonTransactionBuilder = function(){
  */
 module.exports = {
     list: function(req, res, next){
-        json.use(res);
+        var json = new JsonFormater(res);
         json.build({
             summary: {
                 credit: 50,
