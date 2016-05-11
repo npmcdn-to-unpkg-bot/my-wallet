@@ -14,12 +14,8 @@ var mysql = require('mysql');
  * @return {undefined}
  */
 var DB = function( mysql ){
-    this.db = mysql.createConnection({
-        host: global.config.DB_HOST,
-        user: global.config.DB_USER,
-        password: global.config.DB_PASS,
-        database: global.config.DB_BASE
-    });
+    this.mysql = mysql;
+    this.connect();
 };
 
 /**
@@ -27,15 +23,23 @@ var DB = function( mysql ){
  * This methos shoud open a MySQL connection, than execute the query and close all connections after call calback
  * 
  * @param {string} query The SQL query
+ * @param {array} values An array of values that will replace {?} caracteres in sql string
+ * @param {object} values A Key:value object that contains keys and values to replace {?} caracteres in sql string
+ * @param {function} values an Callback function. the same of next
  * @param {function} next The callback function that will trigger alter MySQL returns
  * @returns {undefined}
  */
-DB.prototype.query = function( query, next ){
+DB.prototype.query = function( query, values, next ){
     
-    var _self = this;
+    var db = this.connect();
+    
+    if (typeof values === 'function'){
+        next = values;
+        values = false;
+    }
     
     var parseResponse = function( err, rows, fields ){
-        _self.db.end();
+        db.end();
         
         if (err){
             next(err);
@@ -51,11 +55,27 @@ DB.prototype.query = function( query, next ){
             return;
         }
         
-        _self.db.query( query, parseResponse );
+        console.log('[INFO] ' + query);
+        
+        if (values){
+            db.query( query, values, parseResponse );
+        } else {
+            db.query( query, parseResponse );
+        }
+        
     };
     
-    this.db.connect( executeQuery );
+    db.connect( executeQuery );
     
+};
+
+DB.prototype.connect = function(){
+    return this.mysql.createConnection({
+        host: global.config.DB_HOST,
+        user: global.config.DB_USER,
+        password: global.config.DB_PASS,
+        database: global.config.DB_BASE
+    });
 };
 
 module.exports = new DB( mysql );
