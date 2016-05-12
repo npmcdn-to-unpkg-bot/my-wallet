@@ -138,6 +138,20 @@ Wallet.prototype.save = function( next ){
 };
 
 /**
+ * Wallet.expor()
+ * Create and param object
+ * 
+ * @returns {object}
+ */
+Wallet.prototype.export = function(){
+    return {
+        wallet_id: this.wallet_id,
+        wallet_name: this.wallet_name,
+        user_id: this.user_id
+    };
+};
+
+/**
  * Wallets
  * 
  * This object will manage the plural Wallet behaviour

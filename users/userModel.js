@@ -297,6 +297,20 @@ User.prototype.setPrimary = function( email, next ){
 };
 
 /**
+ * User.export();
+ * Create an abstracto object to current User
+ * 
+ * @returns {object}
+ */
+User.prototype.export = function(){
+    return {
+        user_id: this.user_id,
+        user_name: this.user_name,
+        user_email: this.user_email
+    };
+};
+
+/**
  * Users
  * 
  * This object will manage the plural User behaviour
