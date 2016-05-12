@@ -169,6 +169,20 @@ List.prototype.save = function( next ){
 };
 
 /**
+ * List.export()
+ * Create an abstract object to List
+ * 
+ * @returns {nm$_listModel.List.prototype.export.listModelAnonym$3}
+ */
+List.prototype.export = function(){
+    return {
+        list_id: this.list_id,
+        list_name: this.list_name,
+        user_id: this.user_id
+    };
+};
+
+/**
  * Lists
  * 
  * This object will manage the plural List behaviour
