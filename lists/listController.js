@@ -4,82 +4,67 @@
  * This software is free for General Porpouses
  * @author: Max Andriani <max.andriani@gmail.com>
  * 
- * Manage the list behaviour
+ * Manage the user behaviour
  */
 
 // Requires
-var listModel = require(global.pathTo('/lists/listModel.js'));
-var json = require(global.pathTo('/json/jsonFormater.js'));
+var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
+var JsonFormater = require(global.pathTo('/json/jsonFormater.js'));
+var validate = require('validator');
 
-// TODO Remove this
-var id = 0;
-var randonListBuilder = function(){
-    var data = {};
-    data.list_id = ++id;
-    data.list_name = "Lista padrão " + id;
-    
-    return listModel.factory( data );
+/**
+ * Check if there are an current session and if true send the current user
+ * 403: FORBIDEN
+ * @param {function} next The callback function
+ * @returns {undefined}
+ */
+function validateSession( req, next ){
+    var session = sessionModel.getSession(req);
+    session.getCurrentUser(function(err, user){
+        if (err){
+            next(err);
+        } else {
+            next(false, user);
+        }
+    });
 };
+
+// route functions
+function findLists( req, res ){
+    // Response controller
+    var json = new JsonFormater(res);
+    
+    // Restrict call
+    var find = function(err, user){
+        
+        // get parameters
+        var listName = req.body.list_name;
+        
+    };
+    
+    // Validations
+    try{
+        validateSession( req, find);
+    } catch (err){
+        json.buildError(err);
+    }
+};
+
+function getLists( req, res ){};
+
+function saveList( req, res ){};
+
+function insertList( req, res ){};
+
+function deleteList( req, res ){};
 
 /*
  * Public methods
  */
 module.exports = {
-    list: function(req, res, next){
-        json.use(res);
-        json.build({
-            summary: {
-                credit: 50,
-                debit: 30,
-                total: 20
-            },
-            pagination: {
-                page: 1,
-                pages: 10
-            },
-            lists: [
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder(),
-                randonListBuilder()
-            ]
-        });
-        
-        if (next){
-            next();
-        }
-    },
-    get: function(req, res, next){
-        json.use(res);
-        json.build(randonListBuilder());
-        
-        if (next){
-            next();
-        }
-    },
-    save: function(req, res, next){
-        json.use(res);
-        json.build(randonListBuilder());
-        
-        if (next){
-            next();
-        }
-    },
-    new: function(req, res, next){
-        json.use(res);
-        json.build(randonListBuilder());
-        
-        if (next){
-            next();
-        }
-    },
-    delete: function(req, res, next){
-        json.use(res);
-        json.build();
-    }
+    find: findLists, 
+    get: getLists,
+    save: saveList,
+    new: insertList,
+    delete: deleteList
 };

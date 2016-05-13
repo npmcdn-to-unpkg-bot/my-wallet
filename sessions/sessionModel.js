@@ -19,8 +19,9 @@ Session.prototype.auth = function(email, pass, next){
     var _self = this;
     
     userModel.find({
-            email: email, 
-            pass: sha1.encrypt(pass, global.config.SESSION_SECRET)
+            search: email,
+            fields: ['email'],
+            password: sha1(pass, global.config.SESSION_SECRET).toString()
         },
         function(err, data){
             if (err){
@@ -30,10 +31,10 @@ Session.prototype.auth = function(email, pass, next){
         
             _self.user = data;
             _self.req.session = {
-                auth: AES.encrypt( JSON.stringify(_self.user), global.config.SESSION_SECRET )
+                auth: AES.encrypt( JSON.stringify(_self.user), global.config.SESSION_SECRET ).toString()
             };
             
-            next(false, data);
+            next(false, _self.req.session);
     });
 };
 
@@ -61,8 +62,29 @@ Session.prototype.getCurrentUser = function(next){
     }
 };
 
+/**
+ * Session.hasPermission( user, capability, next )
+ * @param {User} user An User object
+ * @param {string} capability an permission string
+ * @param {function} next The callback function 
+ * @returns {undefined}
+ */
+Session.prototype.hasPermission = function( user, capability, next ){
+    user.getRoles( function( roles ){
+        if (roles.indexOf(capability) > -1){
+            next(false, false);
+        } else {
+            next(false, true);
+        }
+    });
+};
+
 Session.prototype.use = function(request){
     this.req = request;
 };
 
-module.exports = Session;
+module.exports = {
+    getSession: function(req){
+        return new Session(req);
+    }
+};

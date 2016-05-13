@@ -50,12 +50,31 @@ var ERROR = new ErrorEnum();
 ERROR.ERROR_API_ROUTE_NOT_FOUND = "Rota não encontrada";
 
 /**
+ * Status Enum
+ */
+var STATUS = {
+    SUCCESS: 200, //OK - Response to a successful GET, PUT, PATCH or DELETE. Can also be used for a POST that doesn't result in a creation.
+    CREATED: 201, //201 Created - Response to a POST that results in a creation. Should be combined with a Location header pointing to the location of the new resource
+    NO_CONTENT: 204, // No Content - Response to a successful request that won't be returning a body (like a DELETE request)
+    NOT_MODIFIED: 304, // Not Modified - Used when HTTP caching headers are in play
+    BAD_REQUEST: 400, // Bad Request - The request is malformed, such as if the body does not parse
+    UNAUTHORIZED: 401, // Unauthorized - When no or invalid authentication details are provided. Also useful to trigger an auth popup if the API is used from a browser
+    FORBIDEN: 403, // Forbidden - When authentication succeeded but authenticated user doesn't have access to the resource
+    NOT_FOUND: 404, // Not Found - When a non-existent resource is requested
+    METHOD_NOT_ALLOWED: 405, // Method Not Allowed - When an HTTP method is being requested that isn't allowed for the authenticated user
+    GONE: 410, // Gone - Indicates that the resource at this end point is no longer available. Useful as a blanket response for old API versions
+    UNSUPPORTED_MEDIA_TYPE: 415, // Unsupported Media Type - If incorrect content type was provided as part of the request
+    UNPROCESSABLE_ENTITY: 422, // Unprocessable Entity - Used for validation errors
+    TOO_MANY_REQUESTS: 429 // Too Many Requests - When a request is rejected due to rate limiting
+};
+
+/**
  * JsonFormater
  * An json parser to create standarized json comunication objects
  * 
  * @param {response} res Express response object
  */
-var JsonFormater = function( res ){
+var JsonBuilder = function( res ){
     if (res){
         this.use(res);
     }
@@ -70,7 +89,7 @@ var JsonFormater = function( res ){
  * @param {response} res The Express response object reference
  * @returns {undefined}
  */
-JsonFormater.prototype.use = function( res ){
+JsonBuilder.prototype.use = function( res ){
     this.res = res;
     return this;
 };
@@ -84,7 +103,7 @@ JsonFormater.prototype.use = function( res ){
  * @param {string} statusMessage An string with a user message
  * @return {undefined}
  */
-JsonFormater.prototype.build = function( data, statusCode, statusMessage ){
+JsonBuilder.prototype.build = function( data, statusCode, statusMessage ){
     var responseBody = {
         status: 200,
         message: 'Success',
@@ -127,7 +146,7 @@ JsonFormater.prototype.build = function( data, statusCode, statusMessage ){
  *      Second: An contactened error enum like new Error('404: ERROR_ENUM') that will be translated to users message and will change the HTTP status code
  * @return {undefined}
  */
-JsonFormater.prototype.buildError = function( err ){
+JsonBuilder.prototype.buildError = function( err ){
     /*
      * {
      *     key: 'ERROR_API_ROUTE_NOT_FOUND',
@@ -138,4 +157,10 @@ JsonFormater.prototype.buildError = function( err ){
     this.build(ERROR.build(err), ERROR.code(err));
 };
 
-module.exports = JsonFormater;
+module.exports = {
+    getBuilder: function(res){
+        return new JsonBuilder(res);
+    },
+    errorEnum: ERROR,
+    statusEnum: STATUS
+};

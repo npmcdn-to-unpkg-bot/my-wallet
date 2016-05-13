@@ -8,30 +8,29 @@
  */
 
 // Requires
-var SessionModel = require(global.pathTo('/sessions/sessionModel.js'));
-var json = require(global.pathTo('/json/jsonFormater.js'));
+var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
+var bodyBuilder = require(global.pathTo('/json/bodyBuilder.js'));
 
 /*
  * Public methods
  */
 module.exports = {
     auth: function(req, res, next){
-        var currentSession = new SessionModel(req);
+        var currentSession = new sessionModel.getSession(req);
         var validator = require('validator');
-        
-        json.use(res);
+        var json = bodyBuilder.getBuilder(res);
         
         var user = {};
-        user.email = req.param('email');
-        user.pass = req.param('pass');
+        user.email = req.body.user_email;
+        user.pass = req.body.password;
         
         try{
             
-            if (!validator.isEmail(user.email)){
+            if (!(user.email && validator.isEmail(user.email))){
                 throw new Error('ERROR_USER_INVALID_EMAIL');
             }
             
-            if (!validator.pass){
+            if (!user.pass){
                 throw new Error('ERROR_USER_INVALID_PASS');
             }
             
@@ -41,11 +40,7 @@ module.exports = {
                     return;
                 }
                 
-                json.build(false, data);
-                
-                if (next){
-                    next();
-                }
+                json.build(data);
             });
             
         } catch (e) {
@@ -57,9 +52,8 @@ module.exports = {
         
     },
     logout: function(req, res, next){
-        var currentSession = new SessionModel(req);
-        
-        json.use(res);
+        var currentSession = new sessionModel.getSession(req);
+        var json = bodyBuilder.getBuilder(res);
         
         currentSession.logout(function(err){
             if (err){

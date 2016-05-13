@@ -246,16 +246,16 @@ User.prototype.addAccount = function( account, next ){
         }
         
         query = query.slice(0,-1);
-        query += ") Values (?, ?, '?',";
+        query += ") Values (?, ?, ?,";
         
         if (typeof account.secret !== 'undefined'){
-            query += " '?',";
+            query += " ?,";
         }
         if (typeof account.token !== 'undefined'){
-            query += " '?',";
+            query += " ?,";
         }
         if (typeof account.is_primary !== 'undefined'){
-            query += " '?',";
+            query += " ?,";
         }
         
         query = query.slice(0,-1);
@@ -348,6 +348,10 @@ Users.prototype.find = function( find, next ){
         find.page = 0;
     }
     
+    if (typeof find.password === 'undefined'){
+        find.password = null;
+    }
+    
     if (typeof next !== 'function'){
         next = function(){};
     }
@@ -359,21 +363,36 @@ Users.prototype.find = function( find, next ){
                 'a.email as user_email '+
             'From '+
                 'users as u '+
-            'Left Join '+
-                'auth as a On a.user_id And a.is_primary = 1 ';
+            'Inner Join '+
+                'auth as a On a.user_id = u.id And a.is_primary = 1 ';
     
     if (find.search){
-        // Find by key
-        var nameString = find.search.replace(/\s/g, '%');
-        var emailString = find.search;
-        query += 'Where ';
-        query += " u.name Like '%?%'";
-        values.push(nameString);
-        query += " a.email = '?'";
-        values.push(emailString);
-    } else {
-        // List all
-        // Nothing to do
+        query += 'Where 1=1';
+        
+        if (find.fields.length > 0){
+            for( var x in find.fields){
+                // Find by key
+                switch(find.fields[x]){
+                    case 'email':
+                        query += " And a.email = ?";
+                        values.push(find.search);
+                        break;
+                    case 'name':
+                        var keyString = find.search.replace(/\s/g, '%');
+                        query += ' And u.name = ?';
+                        values.push(keyString);
+                        break;
+                }
+            }
+        } else {
+            // Find by key
+            var nameString = find.search.replace(/\s/g, '%');
+            var emailString = find.search;
+            query += " And u.name Like '%?%'";
+            values.push(nameString);
+            query += " And a.email = '?'";
+            values.push(emailString);
+        }
     }
     
     // Sort and order
@@ -471,6 +490,7 @@ Users.prototype.getUserByEmail = function( user_email, next ){
  */
 Users.prototype.insertUser = function( user_data, next ){
     var db = require(global.pathTo('/db/dbModel.js'));
+    var sha1 = require('crypto-js/hmac-sha1');
     var checkQuery;
     var checkValues = [];
     var insertQuery;
@@ -485,16 +505,16 @@ Users.prototype.insertUser = function( user_data, next ){
                  'Left Join '+
                     'users as u On u.id = a.user_id '+
                  'Where '+
-                    'a.email = \'?\' Limit 1;';
+                    'a.email = ? Limit 1;';
     checkValues.push(user_data.user_email);
     
     insertQuery = 'Insert Into '+
                     'users '+
                         '(name, password) '+
                     'Values '+
-                        "('?', '?');";
+                        "(?, ?);";
     insertValues.push(user_data.user_name);
-    insertValues.push(user_data.password);
+    insertValues.push(sha1(user_data.password, global.config.SESSION_SECRET).toString());
     
     var afterCheck = function(err, data, fields){
         if (err){
@@ -504,7 +524,7 @@ Users.prototype.insertUser = function( user_data, next ){
         
         if (data.length == 0){
             // Insert User
-            db.query( insertQuery, afterInsert );
+            db.query( insertQuery, insertValues, afterInsert );
         } else {
             next(new Error('ERROR_USER_ALREADY_EXISTS'));
         }
@@ -512,7 +532,8 @@ Users.prototype.insertUser = function( user_data, next ){
     
     var afterInsert = function(err, data, fields){
         if (err){
-            next(err);
+            next(new Error('ERROR_USERS_UNNABLE_TO_INSERT_USER'));
+            return;
         }
         
         user_data.user_id = data.insertId;
@@ -534,7 +555,7 @@ Users.prototype.insertUser = function( user_data, next ){
     };
     
     // Check
-    db.query( checkQuery, afterCheck);
+    db.query( checkQuery, checkValues, afterCheck);
     
 };
 
