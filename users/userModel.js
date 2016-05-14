@@ -18,11 +18,20 @@ var User = function( data ){
                 case 'user_id':
                 case 'user_email':
                 case 'user_name':
+                case 'capabilities':
                     this[x] = data[x];
                     break;
             }
         }
     }
+    
+    // ByPass
+    // TODO Secure issues
+    this.capabilities = [
+        'transactions',
+        'wallets',
+        'lists'
+    ];
 };
 
 /**
@@ -75,7 +84,7 @@ User.prototype.delete = function( next ){
         
         var removeWallets = function(err){
             if (err){
-                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_TRANSACTIONS'));
+                next(new Error('ERROR_USERS_FAILURE_ON_REMOVE_TRANSACTIONS'));
                 return;
             }
             db.query( removeWalletsQuery, [userId], removeLists );
@@ -83,7 +92,7 @@ User.prototype.delete = function( next ){
         
         var removeLists = function(err){
             if (err){
-                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_WALLETS'));
+                next(new Error('ERROR_USERS_FAILURE_ON_REMOVE_WALLETS'));
                 return;
             }
             db.query( removeListsQuery, [userId], removeAuth );
@@ -91,7 +100,7 @@ User.prototype.delete = function( next ){
         
         var removeAuth = function(err){
             if (err){
-                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_LISTS'));
+                next(new Error('ERROR_USERS_FAILURE_ON_REMOVE_LISTS'));
                 return;
             }
             db.query( removeAuthQuery, [userId], removeUser );
@@ -99,12 +108,12 @@ User.prototype.delete = function( next ){
         
         var removeUser = function(err){
             if (err){
-                next(new Error('ERROR_USER_FAILURE_ON_REMOVE_AUTH'));
+                next(new Error('ERROR_USERS_FAILURE_ON_REMOVE_AUTH'));
                 return;
             }
             db.query( removeUserQuery, function(err){
                 if (err){
-                    next(new Error('ERROR_FAILURE_ON_REMOVE_USER'));
+                    next(new Error('ERROR_USERS_FAILURE_ON_REMOVE_USER'));
                 } else {
                     next(false);
                 }
@@ -141,7 +150,7 @@ User.prototype.save = function( next ){
                         'Limit 1;';
             db.query( query, [_self.user_name, _self.user_id], function(err){
                if (err){
-                   next(err);
+                   next(new Error('ERROR_USERS_FAILURE_ON_SAVE_DATA'));
                    return;
                }
                
@@ -157,8 +166,8 @@ User.prototype.save = function( next ){
                                 'a.user_id!=\'?\' Limit 1;';
             
             db.query( checkQuery, [_self.user_email, _self.user_id], function(err, data){
-                if (err){
-                    next(err);
+                if (err && (!err && data.length > 0)){
+                    next(new Error('ERROR_USERS_EMAIL_IS_NOT_AVAILABLE'));
                     return;
                 }
                 
@@ -172,7 +181,11 @@ User.prototype.save = function( next ){
                               'Where auth.is_primary=1 And auth.user_id=\'?\' Limit 1;';
             
             db.query( updateQuery, [_self.user_email, _self.user_id], function(err, data){
-               next(err); 
+                if (err){
+                    next(new Error('ERROR_USERS_FAILURE_ON_UPDATE_EMAIL'));
+                }
+                
+                next(false); 
             });
         };
 
@@ -202,7 +215,14 @@ User.prototype.changePass = function( passwd, next ){
         
         var query = 'Update users Set password=\'?\' Limit 1;';
         
-        db.query( query, [passwd_hash], next );
+        db.query( query, [passwd_hash], function(err){
+            if (err){
+                next(new Error('ERROR_USERS_FAILURE_ON_CHANGE_PASSWORD'));
+                return;
+            } else {
+                next(false);
+            }
+        });
     } catch(err) {
         next(err);
     }
@@ -261,7 +281,13 @@ User.prototype.addAccount = function( account, next ){
         query = query.slice(0,-1);
         query += ');';
         
-        db.query( query, values, next );
+        db.query( query, values, function(err){
+            if (err){
+                next(new Error('ERROR_USERS_FAILURE_ON_ADD_ACCOUNT'));
+            } else {
+                next();
+            }
+        });
     } catch (err) {
         next(err);
     }
@@ -288,7 +314,13 @@ User.prototype.setPrimary = function( email, next ){
             }
             
             // Reset is OK
-            db.query( queryUpdate, [email, userId], next );
+            db.query( queryUpdate, [email, userId], function(err){
+                if (err){
+                    next(new Error('ERROR_USERS_FAILURE_ON_SET_PRIMARY_ACCOUNT'));
+                } else {
+                    next();
+                }
+            });
         });
         
     } catch(err) {
@@ -306,7 +338,8 @@ User.prototype.export = function(){
     return {
         user_id: this.user_id,
         user_name: this.user_name,
-        user_email: this.user_email
+        user_email: this.user_email,
+        capabilities: this.capabilities
     };
 };
 
@@ -382,6 +415,10 @@ Users.prototype.find = function( find, next ){
                         query += ' And u.name = ?';
                         values.push(keyString);
                         break;
+                    case 'user_id':
+                        query += ' And u.id = ?';
+                        values.push(find.search);
+                        break;
                 }
             }
         } else {
@@ -408,7 +445,7 @@ Users.prototype.find = function( find, next ){
     // Do the magic
     db.query( query, values, function(err, data, fields){
         if (err){
-            next(err);
+            next(new Error('ERROR_USERS_FAILURE_ON_SEARCH_USER'));
             return;
         }
         
@@ -430,34 +467,10 @@ Users.prototype.find = function( find, next ){
  * @returns {undefined}
  */
 Users.prototype.getUserById = function( user_id, next ){
-    var db = require(global.pathTo('/db/dbModel.js'));
-    var query;
-    
-    query = 'Select '+
-                'u.id as user_id,'+
-                'u.name as user_name,'+
-                'a.email as user_email '+
-            'From '+
-                'users as u '+
-            'Left Join '+
-                'auth as a On a.user_id And a.is_primary = 1 '+
-            'Where '+
-                "u.id = ? "+
-            'Limit 1;';
-    
-    // Do the magic
-    db.query( query, [user_id], function(err, user){
-        if (err){
-            next(err);
-            return;
-        }
-        
-        if (user.length == 1){
-            next(false, new User(user[0]));
-        } else {
-            next( new Error('404: ERROR_USER_NOT_FOUND') );
-        }
-    });
+    this.find({
+        search: user_id,
+        fields: ['user_id']
+    }, next);
 };
 
 /**
@@ -526,13 +539,13 @@ Users.prototype.insertUser = function( user_data, next ){
             // Insert User
             db.query( insertQuery, insertValues, afterInsert );
         } else {
-            next(new Error('ERROR_USER_ALREADY_EXISTS'));
+            next(new Error('ERROR_USERS_ALREADY_EXISTS'));
         }
     };
     
     var afterInsert = function(err, data, fields){
         if (err){
-            next(new Error('ERROR_USERS_UNNABLE_TO_INSERT_USER'));
+            next(new Error('ERROR_USERS_FAILURE_ON_INSERT_USER'));
             return;
         }
         

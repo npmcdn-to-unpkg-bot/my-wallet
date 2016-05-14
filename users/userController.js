@@ -9,93 +9,76 @@
 
 // Requires
 var userModel = require(global.pathTo('/users/userModel.js'));
-var bodyBuilder = require(global.pathTo('/json/bodyBuilder.js'));
-var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
+var bodyBuilder = require(global.pathTo('/builder/bodyBuilder.js'));
+var statusEnum = require(global.pathTo('/messages/statusEnum.js'));
 var validate = require('validator');
 
 /*
  * Get user
  */
 function getUserDetails(req, res){
-    var json = bodyBuilder.getBuilder(res);
-    var session = sessionModel.getSession(req);
-    
-    var checkPermission = function( err, currentUser ){
-        try{
+    try{
+        
+        if (!req.currentUser){
+            throw new Error('UNAUTHORIZED');
+        }
+        
+        if (!validate.isNumeric(req.currentUser.user_id)){
+            throw new Error('ERROR_INVALID_USER_ID');
+        }
+        
+        var json = bodyBuilder.getBuilder(res);
+        
+        userModel.getUserById( req.currentUser.user_id, function(err, user){
             if (err){
-                throw new Error(bodyBuilder.statusEnum.UNAUTHORIZED + ': ERROR_USERS_UNAUTHORIZED');
+                json.buildError(err);
+            } else {
+                json.build( user.export() );
             }
-            getDetails(false, currentUser.user_id);
-        } catch(err){
-            next(err);
-        }
-    };
-    
-    var getDetails = function( err, userId ){
-        // User id
-        try{
-            if (!validate.isNumeric(userId)){
-                throw new Error('ERROR_INVALID_USER_ID');
-            }
-            
-            userModel.getUserById( userId, function(err, user){
-                if (err){
-                    json.buildError(err);
-                } else {
-                    json.build( user.export() );
-                }
-            });
-            
-        } catch (err) {
-            json.buildError(err);
-        }
-    };
-    
-    session.getCurrentUser( checkPermission );
+        });
+        
+    } catch(err) {
+        json.buildError(err);
+    }
 };
 
 function saveUserData(req, res){
     var json = bodyBuilder.getBuilder(res);
-    var session = sessionModel.getSession(req);
     
-    var validateUserData = function(err, currentUser){
-        try{
-            var userData = {};
-            
-            if (err){
-                throw err;
-            }
-            
-            userData.user_id = currentUser.user_id;
-            userData.user_name = req.body.user_name;
-            userData.user_email = req.body.user_email;
+    try{
+        var userData = {};
 
-            if (!validate.isNumeric(userData.user_id)){
-                throw new Error('ERROR_USER_INVALID_ID');
+        if (!req.currentUser){
+            throw new Error('UNAUTHORIZED');
+        }
+
+        userData.user_id = req.currentUser.user_id;
+        userData.user_name = req.body.user_name;
+        userData.user_email = req.body.user_email;
+
+        if (!validate.isNumeric(userData.user_id)){
+            throw new Error('ERROR_USERS_INVALID_ID');
+        }
+
+        if (typeof userData.user_name !== 'string'){
+            throw new Error('ERROR_USERS_INVALID_NAME');
+        }
+
+        if (!validate.isEmail(userData.user_email)){
+            throw new Error('ERROR_USERS_INVALID_EMAIL');
+        }
+
+        var user = userModel.factory(userData);
+        user.save(function(err){
+            if (err){
+                json.buildError(err);
+            } else {
+                json.build(user.export());
             }
-            
-            if (typeof userData.user_name !== 'string'){
-                throw new Error('ERROR_USER_INVALID_NAME');
-            }
-            
-            if (!validate.isEmail(userData.user_email)){
-                throw new Error('ERROR_USER_INVALID_EMAIL');
-            }
-            
-            var user = userModel.factory(userData);
-            user.save(function(err){
-                if (err){
-                    json.buildError(err);
-                } else {
-                    json.build(user.export());
-                }
-            });
-        } catch (err) {
-            json.buildError(err);
-        }  
-    };
-    
-    session.getCurrentUser( validateUserData );
+        });
+    } catch (err) {
+        json.buildError(err);
+    }  
 }
 
 function insertUser(req, res){
@@ -108,20 +91,20 @@ function insertUser(req, res){
 
     try{
         if (!(typeof userData.user_name === 'string' && userData.user_name.length > 2)){
-            throw new Error('ERROR_USER_INVALID_NAME');
+            throw new Error('ERROR_USERS_INVALID_NAME');
         }
         if (!validate.isEmail(userData.user_email)){
-            throw new Error('ERROR_USER_INVALID_EMAIL');
+            throw new Error('ERROR_USERS_INVALID_EMAIL');
         }
         if (!(typeof userData.password === 'string' && userData.password.length > 2)){
-            throw new Error('ERROR_USER_INVALID_PASSWORD');
+            throw new Error('ERROR_USERS_INVALID_PASSWORD');
         }
 
         userModel.insertUser(userData, function(err, user){
             if (err){
                 json.buildError(err);
             } else {
-                json.build(user.export(), bodyBuilder.statusEnum.CREATED);
+                json.build(user.export(), statusEnum.CREATED);
             }
         });
     } catch(err) {
@@ -131,33 +114,28 @@ function insertUser(req, res){
 
 function deleteUser(req, res){
     var json = bodyBuilder.getBuilder(res);
-    var session = sessionModel.getSession(req);
-        
-    var deleteCurrentUser = function(err, currentUser){
-        try {
-            if (err){
-                throw err;
-            }
-            
-            userModel.getUserById( currentUser.user_id, function(err, user){
-                if (err){
-                    json.buildError(err);
-                } else {
-                    user.delete(function(err){
-                        if (err){
-                            json.buildError(err);
-                        } else {
-                            json.build();
-                        }
-                    });
-                }
-            });
-        } catch(err) {
-            json.buildError(err);
+
+    try {
+        if (!req.currentUser){
+            throw new Error(statusEnum.UNAUTHORIZED);
         }
-    };
-    
-    session.getCurrentUser( deleteCurrentUser );
+
+        userModel.getUserById( req.currentUser.user_id, function(err, user){
+            if (err){
+                json.buildError(err);
+            } else {
+                user.delete(function(err){
+                    if (err){
+                        json.buildError(err);
+                    } else {
+                        json.build();
+                    }
+                });
+            }
+        });
+    } catch(err) {
+        json.buildError(err);
+    }
 }
 
 /*

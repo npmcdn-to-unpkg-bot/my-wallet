@@ -8,7 +8,11 @@
 // Require
 var userModel = require(global.pathTo('/users/userModel.js'));
 var sha1 = require('crypto-js/hmac-sha1');
-var AES = require('crypto-js/aes');
+var jwt = require('jsonwebtoken');
+
+var jwtConfig = {
+    expiresIn: global.config.SESSION_EXPIRES
+};
 
 var Session = function( request ){
     this.req = request;
@@ -25,16 +29,18 @@ Session.prototype.auth = function(email, pass, next){
         },
         function(err, data){
             if (err){
-                next(new Error('ERROR_USER_INVALID_CREDENTIALS'));
+                next(new Error('ERROR_SESSION_INVALID_CREDENTIALS'));
                 return;
             }
-        
-            _self.user = data;
+            
+            _self.user = data[0];
+            var auth = jwt.sign( _self.user, global.config.SESSION_SECRET, jwtConfig );
+            
             _self.req.session = {
-                auth: AES.encrypt( JSON.stringify(_self.user), global.config.SESSION_SECRET ).toString()
+                auth: auth
             };
             
-            next(false, _self.req.session);
+            next(false, auth);
     });
 };
 
@@ -47,18 +53,13 @@ Session.prototype.logout = function(next){
     }
 };
 
-Session.prototype.getCurrentUser = function(next){
+Session.prototype.getCurrentUser = function(token, next){
     try{
-        if (!(this.req.session && typeof this.req.session.auth !== 'undefined')){
-            throw new Error('ERROR_SESSION_EXPIRED');
-        }
-        
-        var user = AES.decrypt( this.req.session.auth , global.config.SESSION_SECRET );
-        this.user = user;
-        
+        var user = jwt.verify(token, global.config.SESSION_SECRET);
+        this.user = userModel.factory(user);
         next(false, user);
     } catch(e) {
-        next(e);
+        next(new Error('ERROR_SESSION_EXPIRED'));
     }
 };
 
@@ -84,7 +85,19 @@ Session.prototype.use = function(request){
 };
 
 module.exports = {
-    getSession: function(req){
-        return new Session(req);
+    getSession: function(req, res){
+        return new Session(req, res);
+    },
+    middlewhere: function(req, res, next){
+        var token = req.headers['x-access-token'] || req.body.token || req.query.token || null;
+        var session = new Session(req, res);
+        session.getCurrentUser(token, function(err, user){
+            if (err){
+                req.currentUser = null;
+            } else {
+                req.currentUser = user;
+            }
+            next();
+        });
     }
 };

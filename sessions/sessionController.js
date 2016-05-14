@@ -9,7 +9,7 @@
 
 // Requires
 var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
-var bodyBuilder = require(global.pathTo('/json/bodyBuilder.js'));
+var bodyBuilder = require(global.pathTo('/builder/bodyBuilder.js'));
 
 /*
  * Public methods
@@ -27,16 +27,16 @@ module.exports = {
         try{
             
             if (!(user.email && validator.isEmail(user.email))){
-                throw new Error('ERROR_USER_INVALID_EMAIL');
+                throw new Error('ERROR_SESSION_MISSING_EMAIL');
             }
             
             if (!user.pass){
-                throw new Error('ERROR_USER_INVALID_PASS');
+                throw new Error('ERROR_SESSION_MISSING_PASS');
             }
             
             currentSession.auth(user.email, user.pass, function(err, data){
                 if (err){
-                    json.build(err, 500);
+                    json.buildError(err);
                     return;
                 }
                 

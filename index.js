@@ -23,6 +23,7 @@ var app = express();
 var routes = require(global.pathTo('/routes.js'));
 var session = require('client-sessions');
 var bodyParser = require('body-parser');
+var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
 
 // Change the session managment to Mozilla
 app.use(session({
@@ -32,11 +33,22 @@ app.use(session({
   activeDuration: global.config.SESSION_LIFETIME
 }));
 
+// Add CORS
+app.use(function(req, res, next){
+   res.setHeader('Access-Control-Allow-Origin', '*');
+   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+   next();
+});
+
 // parse application/x-www-form-urlencoded 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
  
 // parse application/json 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+// Verify Access Token
+app.use(sessionModel.middlewhere);
 
 /**
  * Routing ...

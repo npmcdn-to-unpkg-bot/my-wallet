@@ -14,7 +14,9 @@
 var userControler = require(global.pathTo('/users/userController.js'));
 var sessionControler = require(global.pathTo('/sessions/sessionController.js'));
 
-var bodyBuilder = require(global.pathTo('/json/bodyBuilder.js'));
+var bodyBuilder = require(global.pathTo('/builder/bodyBuilder.js'));
+var messageEnum = require(global.pathTo('/messages/messageEnum.js'));
+var statusEnum = require(global.pathTo('/messages/statusEnum.js'));
 
 var underConstruction = function(req, res){
     var body = bodyBuilder.getBuilder(res);
@@ -93,7 +95,7 @@ function routeSetup(app, express){
      */
     app.get('/api/*', function(req, res, next){
         var body = bodyBuilder.getBuilder(res);
-        body.buildError(new Error('ERROR_API_ROUTE_NOT_FOUND'), 500);
+        body.buildError(new Error(statusEnum.NOT_FOUND));
         
         if (next){
             next();
