@@ -21,6 +21,21 @@ module.exports = {
         }
     },
     
+    // WALLETS
+    ERROR_WALLETS_INVALID_SEARCH_QUERY: { message: 'Search query must be a string', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_PAGE: { message: 'Page argument must be an integer', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_LIST_SIZE: { message: 'Items per page argument must be an integer and lower or equals 100', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_SORT: { message: 'Sort argument must be a string', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_ID_PARAM: { message: 'Referência da carteira inválida', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_NAME_PARAM: { message: 'Parâmetro Nome inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_INVALID_USER_PARAM: { message: 'Parâmetro User inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_WALLETS_FAILURE_ON_SEARCH_LISTS: { message: 'Falha ao pesquisar listas', code: statusEnum.ERROR },
+    ERROR_WALLETS_FAILURE_ON_CLEAR_TRANSACTIONS_RELATIONSHIP: { message: 'Falha ao remover transactions', code: statusEnum.ERROR },
+    ERROR_WALLETS_FAILURE_ON_REMOVE_LIST: { message: 'Falha ao remover transaction', code: statusEnum.ERROR },
+    ERROR_WALLETS_FAILUTE_ON_REMOVE_TRANSACTION: { message: 'Falha ao remover transaction', code: statusEnum.ERROR },
+    ERROR_WALLETS_FAILURE_ON_ADD_TRANSACTION: { message: 'Falha ao adicionar transação', code: statusEnum.ERROR },
+    ERROR_WALLETS_FAILURE_ON_SAVE_LIST: { message: 'Falha ao salvar carteira', code: statusEnum.ERROR },
+    
     // LISTS
     ERROR_LISTS_INVALID_SEARCH_QUERY: { message: 'Search query must be a string', code: statusEnum.BAD_REQUEST },
     ERROR_LISTS_INVALID_PAGE: { message: 'Page argument must be an integer', code: statusEnum.BAD_REQUEST },

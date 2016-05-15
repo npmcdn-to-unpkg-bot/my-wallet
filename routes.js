@@ -9,14 +9,12 @@
 
 //var appController = require(global.pathTo('/main/mainController.js'));
 //var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
-//var walletControler = require(global.pathTo('/wallets/walletController.js'));
+var walletControler = require(global.pathTo('/wallets/walletController.js'));
 var listControler = require(global.pathTo('/lists/listController.js'));
 var userControler = require(global.pathTo('/users/userController.js'));
 var sessionControler = require(global.pathTo('/sessions/sessionController.js'));
 
 var bodyBuilder = require(global.pathTo('/builder/bodyBuilder.js'));
-var messageEnum = require(global.pathTo('/messages/messageEnum.js'));
-var statusEnum = require(global.pathTo('/messages/statusEnum.js'));
 
 var underConstruction = function(req, res){
     var body = bodyBuilder.getBuilder(res);
@@ -61,28 +59,28 @@ function routeSetup(app, express){
     /*
      * Wallets
      */
-    app.get('/api/v1/wallets/', underConstruction); // All transactions
-    app.post('/api/v1/wallets/', underConstruction); // New Transactions
-    app.get('/api/v1/wallets/:walletId', underConstruction); // Single Transaction
-    app.post('/api/v1/wallets/:walletId', underConstruction); // Update single
-    app.post('/api/v1/wallets/:walletId/delete', underConstruction); // Delete transaction
+    app.get('/api/v1/wallets/', walletControler.find); // All Wallets
+    app.post('/api/v1/wallets/', walletControler.insert); // New Wallet
+    app.get('/api/v1/wallets/:walletId', walletControler.get); // Single Wallet
+    app.post('/api/v1/wallets/:walletId', walletControler.save); // Update single Wallet
+    app.post('/api/v1/wallets/:walletId/delete', walletControler.delete); // Delete Wallet
     
     /*
      * Lists
      */
-    app.get('/api/v1/lists/', listControler.find); // All transactions
-    app.post('/api/v1/lists/', listControler.insert); // New Transactions
-    app.get('/api/v1/lists/:listId', listControler.get); // Single Transaction
-    app.post('/api/v1/lists/:listId', listControler.save); // Update single
-    app.post('/api/v1/lists/:listId/delete', listControler.delete); // Delete transaction
+    app.get('/api/v1/lists/', listControler.find); // All Lists
+    app.post('/api/v1/lists/', listControler.insert); // New List
+    app.get('/api/v1/lists/:listId', listControler.get); // Single List
+    app.post('/api/v1/lists/:listId', listControler.save); // Update single List
+    app.post('/api/v1/lists/:listId/delete', listControler.delete); // Delete List
     
     /*
      * Users
      */
-    app.post('/api/v1/users/', userControler.insert); // New Transactions
-    app.get('/api/v1/users/details/', userControler.get); // Single Transaction
-    app.post('/api/v1/users/details/', userControler.save); // Update single
-    app.post('/api/v1/users/delete/', userControler.delete); // Delete transaction
+    app.post('/api/v1/users/', userControler.insert); // New User
+    app.get('/api/v1/users/details/', userControler.get); // Single User
+    app.post('/api/v1/users/details/', userControler.save); // Update single User
+    app.post('/api/v1/users/delete/', userControler.delete); // Delete User
     
     /*
      * Sessions

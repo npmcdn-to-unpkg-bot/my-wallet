@@ -40,7 +40,7 @@ Wallet.prototype.delete = function( next ){
         var walletId = this.wallet_id;
         
         removeTransactionsQuery = 
-            'Detele '+
+            'Delete From '+
                 'transactions '+
             'Where '+
                 'transactions.wallet_id = ? ;';
@@ -120,9 +120,9 @@ Wallet.prototype.save = function( next ){
         var query = 
             'Update wallets '+
                 'Set '+
-                   'name = \'?\' '+
+                   'name = ? '+
                 'Where '+
-                    'wallets.id = \'?\' '+
+                    'wallets.id = ? '+
                 'Limit 1;';
         db.query( query, [_self.wallet_name, _self.wallet_id], function(err){
             if (err){
@@ -188,6 +188,20 @@ Wallets.prototype.find = function( find, next ){
         
         if (typeof find.page === 'undefined'){
             find.page = 0;
+        } else if (find.page < 0){
+            find.page = 0;
+        }
+        
+        if (!find.items){
+            find.items = 9;
+        }
+        
+        if (find.items > 100){
+            find.items = 100;
+        }
+        
+        if (find.items < 9){
+            find.items = 9;
         }
         
         // Start tu build query
@@ -205,20 +219,33 @@ Wallets.prototype.find = function( find, next ){
         
         if (find.search){
             // Find by key
-            var nameString = find.search.replace(/\s/g, '%');
-            query += "And w.name Like '%?%' ";
-            values.push(nameString);
-        } else {
-            // List all
-            // Nothing to do
+            if (find.fields){
+                for(var x in find.fields){
+                    switch(find.fields[x]){
+                        case 'wallet_id':
+                            query += 'And w.id = ?';
+                            values.push(find.search);
+                            break;
+                            
+                        case 'wallet_name':
+                            query += 'And w.name Like %?%';
+                            values.push( find.search.replace(/\s/g, '%') );
+                            break;
+                    }
+                }
+            } else {
+                query += 'And w.name Like %?%';
+                values.push( find.search.replace(/\s/g, '%') );
+            }
         }
         
         // Sort and order
         query += ' Order By w.name Asc ';
     
         // Pagination
-        query += ' Limit ?, 9';
-        values.push((find.page * 9));
+        query += ' Limit ?, ?';
+        values.push((find.page * find.items));
+        values.push(find.items);
     
         // End query
         query += ';';
@@ -230,12 +257,12 @@ Wallets.prototype.find = function( find, next ){
                 return;
             }
 
-            var listList = [];
+            var list = [];
             for(var x in data){
-                listList.push(new List(data[x]));
+                list.push(new Wallet(data[x]));
             }
 
-            next(false, listList);
+            next(false, { wallets: list });
         });
     } catch(err) {
         next(err);
@@ -251,32 +278,20 @@ Wallets.prototype.find = function( find, next ){
  * @param {function} next Callback function
  * @returns {undefined}
  */
-Wallets.prototype.getListById = function( user_id, wallet_id, next ){
-    var db = require(global.pathTo('/db/dbModel.js'));
-    var query;
-    
-    query = 'Select '+
-                'w.id as wallet_id,'+
-                'w.name as wallet_name,'+
-                'w.user_id as user_id '+
-            'From '+
-                'wallets as w '+
-            'Where '+
-                "w.id = ? And "+
-                "w.user_id = ?"+
-            'Limit 1;';
-    
-    // Do the magic
-    db.query( query, [wallet_id, user_id], function(err, user){
+Wallets.prototype.getWalletById = function( user_id, wallet_id, next ){
+    this.find({
+        search: wallet_id,
+        user_id: user_id,
+        fields: ['wallet_id']
+    }, function(err, data){
         if (err){
             next(err);
-            return;
-        }
-        
-        if (user.length == 1){
-            next(false, new User(user[0]));
         } else {
-            next( new Error('404: ERROR_WALLET_NOT_FOUND') );
+            if (data.wallets.length == 1){
+                next(false, { wallet: data.wallets[0] });
+            } else {
+                next(new Error('ERROR_WALLETS_NOT_FOUND'));
+            }
         }
     });
 };
@@ -317,18 +332,19 @@ Wallets.prototype.insertWallet = function( data, next ){
                     'wallets '+
                         '(name, user_id) '+
                     'Values '+
-                        "('?', ?);";
+                        "(?, ?);";
     insertValues.push(data.wallet_name);
     insertValues.push(data.user_id);
     
     db.query( insertQuery, insertValues, function(err, db_data, fields){
         if (err){
             next(err);
+            return;
         }
         
         data.wallet_id = db_data.insertId;
         
-        next(false, new Wallet(data));
+        next(false, { wallet: new Wallet(data) });
     });
     
 };
