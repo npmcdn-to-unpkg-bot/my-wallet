@@ -10,7 +10,7 @@
 //var appController = require(global.pathTo('/main/mainController.js'));
 //var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
 //var walletControler = require(global.pathTo('/wallets/walletController.js'));
-//var listControler = require(global.pathTo('/lists/listController.js'));
+var listControler = require(global.pathTo('/lists/listController.js'));
 var userControler = require(global.pathTo('/users/userController.js'));
 var sessionControler = require(global.pathTo('/sessions/sessionController.js'));
 
@@ -70,11 +70,11 @@ function routeSetup(app, express){
     /*
      * Lists
      */
-    app.get('/api/v1/lists/', underConstruction); // All transactions
-    app.post('/api/v1/lists/', underConstruction); // New Transactions
-    app.get('/api/v1/lists/:listId', underConstruction); // Single Transaction
-    app.post('/api/v1/lists/:listId', underConstruction); // Update single
-    app.post('/api/v1/lists/:listId/delete', underConstruction); // Delete transaction
+    app.get('/api/v1/lists/', listControler.find); // All transactions
+    app.post('/api/v1/lists/', listControler.insert); // New Transactions
+    app.get('/api/v1/lists/:listId', listControler.get); // Single Transaction
+    app.post('/api/v1/lists/:listId', listControler.save); // Update single
+    app.post('/api/v1/lists/:listId/delete', listControler.delete); // Delete transaction
     
     /*
      * Users
@@ -93,13 +93,9 @@ function routeSetup(app, express){
     /*
      * Default
      */
-    app.get('/api/*', function(req, res, next){
+    app.get(/api.*/, function(req, res, next){
         var body = bodyBuilder.getBuilder(res);
-        body.buildError(new Error(statusEnum.NOT_FOUND));
-        
-        if (next){
-            next();
-        }
+        body.buildError(new Error('ERROR_API_ROUTE_NOT_FOUND'));
     });
     
     app.get('*', function(req, res){

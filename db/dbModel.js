@@ -55,7 +55,7 @@ DB.prototype.query = function( query, values, next ){
             return;
         }
         
-        console.log('[INFO] ' + query);
+        console.log('[INFO] ' + query, values);
         
         if (values){
             db.query( query, values, parseResponse );

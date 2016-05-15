@@ -33,14 +33,14 @@ Session.prototype.auth = function(email, pass, next){
                 return;
             }
             
-            _self.user = data[0];
+            _self.user = data.users[0];
             var auth = jwt.sign( _self.user, global.config.SESSION_SECRET, jwtConfig );
             
             _self.req.session = {
                 auth: auth
             };
             
-            next(false, auth);
+            next(false, {auth: auth});
     });
 };
 
