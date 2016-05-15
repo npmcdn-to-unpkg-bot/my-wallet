@@ -7,7 +7,7 @@
  * Routes.js will setup all server API routes
  */
 
-//var appController = require(global.pathTo('/main/mainController.js'));
+var clientControler = require(global.pathTo('/client-access/clientController.js'));
 var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
 var walletControler = require(global.pathTo('/wallets/walletController.js'));
 var listControler = require(global.pathTo('/lists/listController.js'));
@@ -28,9 +28,9 @@ function routeSetup(app, express){
     /*
      * Angular app
      */
-    app.get('/', function(req, res){
-        res.sendFile(global.pathTo('/client-app/restrict.html'));
-    });
+    app.get('/', clientControler.application);
+    app.get('/register/', clientControler.register);
+    app.get('/login/', clientControler.login);
     
     /*
      * Rout behaviour
