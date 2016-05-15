@@ -218,25 +218,29 @@ Wallets.prototype.find = function( find, next ){
         values.push(find.user_id);
         
         if (find.search){
+            query += ' And (';
             // Find by key
             if (find.fields){
                 for(var x in find.fields){
                     switch(find.fields[x]){
                         case 'wallet_id':
-                            query += 'And w.id = ?';
+                            query += ' w.id = ? Or';
                             values.push(find.search);
                             break;
                             
                         case 'wallet_name':
-                            query += 'And w.name Like %?%';
-                            values.push( find.search.replace(/\s/g, '%') );
+                            query += ' w.name Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                     }
                 }
             } else {
-                query += 'And w.name Like %?%';
-                values.push( find.search.replace(/\s/g, '%') );
+                query += ' w.name Like ? Or';
+                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
             }
+            
+            query = query.slice(0, -2);
+            query += ') ';
         }
         
         // Sort and order

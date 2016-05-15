@@ -242,25 +242,29 @@ Lists.prototype.find = function( find, next ){
         values.push(find.user_id);
         
         if (find.search){
+            query += 'And (';
             // Find by key
             if (find.fields){
                 for(var x in find.fields){
                     switch(find.fields[x]){
                         case 'list_id':
-                            query += 'And l.id = ?';
+                            query += ' l.id = ? Or';
                             values.push(find.search);
                             break;
                             
                         case 'list_name':
-                            query += 'And l.name Like %?%';
-                            values.push( find.search.replace(/\s/g, '%') );
+                            query += ' l.name Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                     }
                 }
             } else {
-                query += 'And l.name Like %?%';
-                values.push( find.search.replace(/\s/g, '%') );
+                query += ' l.name Like ? Or';
+                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
             }
+            
+            query = query.slice(0,-2);
+            query += ') ';
         }
         
         // Sort and order
