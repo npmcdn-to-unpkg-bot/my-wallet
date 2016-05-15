@@ -21,6 +21,22 @@ module.exports = {
         }
     },
     
+    // LISTS
+    ERROR_LISTS_INVALID_SEARCH_QUERY: { message: 'Search query must be a string', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_PAGE: { message: 'Page argument must be an integer', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_LIST_SIZE: { message: 'Items per page argument must be an integer and lower or equals 100', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_SORT: { message: 'Sort argument must be a string', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_ID_PARAM: { message: 'Referência da lista inválida', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_NAME_PARAM: { message: 'Parâmetro Nome inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_INVALID_USER_PARAM: { message: 'Parâmetro User inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_LISTS_FAILURE_ON_SEARCH_LISTS: { message: 'Falha ao pesquisar listas', code: statusEnum.ERROR },
+    ERROR_LISTS_FAILURE_ON_CLEAR_TRANSACTIONS_RELATIONSHIP: { message: 'Falha ao remover transactions', code: statusEnum.ERROR },
+    ERROR_LISTS_FAILURE_ON_REMOVE_LIST: { message: 'Falha ao remover transaction', code: statusEnum.ERROR },
+    ERROR_LISTS_FAILUTE_ON_REMOVE_TRANSACTION: { message: 'Falha ao remover transaction', code: statusEnum.ERROR },
+    ERROR_LISTS_FAILURE_ON_ADD_TRANSACTION: { message: 'Falha ao adicionar transação', code: statusEnum.ERROR },
+    ERROR_LISTS_FAILURE_ON_SAVE_LIST: { message: 'Falha ao salvar lista', code: statusEnum.ERROR },
+    
+    
     // USERS
     ERROR_USERS_INVALID_ID: { message: 'A referência de identificação do usuário é inválida!', code: statusEnum.BAD_REQUEST },
     ERROR_USERS_INVALID_NAME: { message: 'Nome inválido!', code: statusEnum.BAD_REQUEST },
@@ -55,5 +71,5 @@ module.exports = {
     UNAUTHORIZED: { message: 'Unauthorized: You need to be authenticated to access this', code: statusEnum.UNAUTHORIZED },
     FORBIDEN: { message: 'Forbidden: You don\'t have permission to access this. This incident will be reported', code: statusEnum.FORBIDEN },
     ERROR_API_ROUTE_NOT_FOUND: { message: 'Not Found: This route do not exists', code: statusEnum.NOT_FOUND },
-    ERROR_API_TOUTE_IS_GONE: { message: 'Gone: This route was no longer valid', code: statusEnum.GONE }
+    ERROR_API_ROUTE_IS_GONE: { message: 'Gone: This route was no longer valid', code: statusEnum.GONE }
 };

@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-module.export = {
+module.exports = {
     SUCCESS: 200, //OK - Response to a successful GET, PUT, PATCH or DELETE. Can also be used for a POST that doesn't result in a creation.
     CREATED: 201, //201 Created - Response to a POST that results in a creation. Should be combined with a Location header pointing to the location of the new resource
     NO_CONTENT: 204, // No Content - Response to a successful request that won't be returning a body (like a DELETE request)
@@ -19,5 +19,13 @@ module.export = {
     UNSUPPORTED_MEDIA_TYPE: 415, // Unsupported Media Type - If incorrect content type was provided as part of the request
     UNPROCESSABLE_ENTITY: 422, // Unprocessable Entity - Used for validation errors
     TOO_MANY_REQUESTS: 429, // Too Many Requests - When a request is rejected due to rate limiting
-    ERROR: 500 // General server error
-};
+    ERROR: 500, // General server error
+    
+    get: function( status ){
+        if (typeof this[status] !== 'undefined'){
+            return this[status];
+        } else {
+            return status;
+        }
+    }
+};;
