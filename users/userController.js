@@ -17,23 +17,24 @@ var validate = require('validator');
  * Get user
  */
 function getUserDetails(req, res){
+    
+    var json = bodyBuilder.getBuilder(res);
+    
     try{
         
         if (!req.currentUser){
             throw new Error('UNAUTHORIZED');
         }
         
-        if (!validate.isNumeric(req.currentUser.user_id)){
+        if (req.currentUser.user_id == NaN){
             throw new Error('ERROR_INVALID_USER_ID');
         }
-        
-        var json = bodyBuilder.getBuilder(res);
         
         userModel.getUserById( req.currentUser.user_id, function(err, user){
             if (err){
                 json.buildError(err);
             } else {
-                json.build( user.export() );
+                json.build( { user: user.export() } );
             }
         });
         
@@ -56,7 +57,7 @@ function saveUserData(req, res){
         userData.user_name = req.body.user_name;
         userData.user_email = req.body.user_email;
 
-        if (!validate.isNumeric(userData.user_id)){
+        if (userData.user_id == NaN){
             throw new Error('ERROR_USERS_INVALID_ID');
         }
 
@@ -73,7 +74,7 @@ function saveUserData(req, res){
             if (err){
                 json.buildError(err);
             } else {
-                json.build(user.export());
+                json.build({ user: user.export() });
             }
         });
     } catch (err) {
@@ -97,7 +98,7 @@ function insertUser(req, res){
             throw new Error('ERROR_USERS_INVALID_EMAIL');
         }
         if (!(typeof userData.password === 'string' && userData.password.length > 2)){
-            throw new Error('ERROR_USERS_INVALID_PASSWORD');
+            throw new Error('ERROR_USER_INVALID_PASSWORD');
         }
 
         userModel.insertUser(userData, function(err, user){
@@ -117,7 +118,7 @@ function deleteUser(req, res){
 
     try {
         if (!req.currentUser){
-            throw new Error(statusEnum.UNAUTHORIZED);
+            throw new Error('UNAUTHORIZED');
         }
 
         userModel.getUserById( req.currentUser.user_id, function(err, user){

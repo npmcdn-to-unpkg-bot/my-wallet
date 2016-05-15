@@ -144,9 +144,9 @@ User.prototype.save = function( next ){
         var updateInfo = function(){
             var query = 'Update users '+
                             'Set '+
-                                'name = \'?\' '+
+                                'name = ? '+
                         'Where '+
-                            'users.id = \'?\' '+
+                            'users.id = ? '+
                         'Limit 1;';
             db.query( query, [_self.user_name, _self.user_id], function(err){
                if (err){
@@ -162,8 +162,8 @@ User.prototype.save = function( next ){
         // Update primary email
         var checkPrimaryEmail = function(){
             var checkQuery = 'Select a.id From auth as a Where '+
-                                'a.email=\'?\' And '+
-                                'a.user_id!=\'?\' Limit 1;';
+                                'a.email=? And '+
+                                'a.user_id!=? Limit 1;';
             
             db.query( checkQuery, [_self.user_email, _self.user_id], function(err, data){
                 if (err && (!err && data.length > 0)){
@@ -177,8 +177,8 @@ User.prototype.save = function( next ){
         
         var updatePrimaryEmail = function(){
             var updateQuery = 'Update auth '+
-                              'Set auth.email = \'?\' '+
-                              'Where auth.is_primary=1 And auth.user_id=\'?\' Limit 1;';
+                              'Set auth.email = ? '+
+                              'Where auth.is_primary=1 And auth.user_id=? Limit 1;';
             
             db.query( updateQuery, [_self.user_email, _self.user_id], function(err, data){
                 if (err){
@@ -454,7 +454,7 @@ Users.prototype.find = function( find, next ){
             userList.push(new User(data[x]));
         }
         
-        next(false, userList);
+        next(false, { users: userList });
     });
 };
 
@@ -470,7 +470,13 @@ Users.prototype.getUserById = function( user_id, next ){
     this.find({
         search: user_id,
         fields: ['user_id']
-    }, next);
+    }, function(err, data){
+        if (err){
+            next(err);
+        } else {
+            next(false, data.users[0]);
+        }
+    });
 };
 
 /**
