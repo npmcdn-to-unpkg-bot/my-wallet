@@ -60,12 +60,12 @@ List.prototype.delete = function( next ){
         
         var removeList = function(err){
             if (err){
-                next(new Error('ERROR_LISTS_FAILURE_CLEAR_TRANSACTIONS_RELATIONSHIP'));
+                next(new Error('ERROR_LISTS_FAILURE_ON_CLEAR_TRANSACTIONS_RELATIONSHIP'));
                 return;
             }
             db.query( removeListQuery, [listId], function(err){
                 if (err){
-                    next(new Error('ERROR_LIST_FAILURE_ON_REMOVE_LIST'));
+                    next(new Error('ERROR_LISTS_FAILURE_ON_REMOVE_LIST'));
                 } else {
                     next(false);
                 }
@@ -101,7 +101,7 @@ List.prototype.removeTransaction = function( transactionId, next ){
     
     db.query( query, transactionId, function(err){
         if (err){
-            next(new Error('ERROR_LISTS_UNNABLE_TO_REMOVE_TRANSACTION'));
+            next(new Error('ERROR_LISTS_FAILUTE_ON_REMOVE_TRANSACTION'));
         } else {
             next(false);
         }
@@ -130,7 +130,7 @@ List.prototype.addTransaction = function( transactionId, next ){
     
     db.query( query, values, function(err){
         if (err){
-            next(new Error('ERROR_LISTS_UNNABLE_TO_ADD_TRANSACTION'));
+            next(new Error('ERROR_LISTS_FAILURE_ON_ADD_TRANSACTION'));
         } else {
             next(false);
         }
@@ -151,13 +151,13 @@ List.prototype.save = function( next ){
         var query = 
             'Update lists '+
                 'Set '+
-                   'name = \'?\' '+
+                   'name = ? '+
                 'Where '+
-                    'lists.id = \'?\' '+
+                    'lists.id = ? '+
                 'Limit 1;';
         db.query( query, [_self.list_name, _self.list_id], function(err){
             if (err){
-                next(err);
+                next(new Error('ERROR_LISTS_FAILURE_ON_SAVE_LIST'));
             } else {
                 next(false);
             }
@@ -209,16 +209,23 @@ Lists.prototype.find = function( find, next ){
     var values = [];
         
     try{
-        if (typeof find.user_id === 'undefined'){
-            throw new Error('ERROR_LISTS_INVALID_USER_ID');
-        }
         
-        if (typeof find.search === 'undefined'){
-            find.search = null;
-        }
-        
-        if (typeof find.page === 'undefined'){
+        if (!find.page){
             find.page = 0;
+        } else if (find.page < 0){
+            find.page = 0;
+        }
+        
+        if (!find.items){
+            find.items = 9;
+        }
+        
+        if (find.items > 100){
+            find.items = 100;
+        }
+        
+        if (find.items < 9){
+            find.items = 9;
         }
         
         // Start tu build query
@@ -236,20 +243,33 @@ Lists.prototype.find = function( find, next ){
         
         if (find.search){
             // Find by key
-            var nameString = find.search.replace(/\s/g, '%');
-            query += "And l.name Like '%?%' ";
-            values.push(nameString);
-        } else {
-            // List all
-            // Nothing to do
+            if (find.fields){
+                for(var x in find.fields){
+                    switch(find.fields[x]){
+                        case 'list_id':
+                            query += 'And l.id = ?';
+                            values.push(find.search);
+                            break;
+                            
+                        case 'list_name':
+                            query += 'And l.name Like %?%';
+                            values.push( find.search.replace(/\s/g, '%') );
+                            break;
+                    }
+                }
+            } else {
+                query += 'And l.name Like %?%';
+                values.push( find.search.replace(/\s/g, '%') );
+            }
         }
         
         // Sort and order
         query += ' Order By l.name Asc ';
     
         // Pagination
-        query += ' Limit ?, 9';
-        values.push((find.page * 9));
+        query += ' Limit ?, ?';
+        values.push((find.page * find.items));
+        values.push(find.items);
     
         // End query
         query += ';';
@@ -257,7 +277,7 @@ Lists.prototype.find = function( find, next ){
         // Do the magic
         db.query( query, values, function(err, data){
             if (err){
-                next(err);
+                next(new Error('ERROR_LISTS_FAILURE_ON_SEARCH_LISTS'));
                 return;
             }
 
@@ -266,7 +286,7 @@ Lists.prototype.find = function( find, next ){
                 listList.push(new List(data[x]));
             }
 
-            next(false, listList);
+            next(false, { lists: listList });
         });
     } catch(err) {
         next(err);
@@ -283,31 +303,15 @@ Lists.prototype.find = function( find, next ){
  * @returns {undefined}
  */
 Lists.prototype.getListById = function( user_id, list_id, next ){
-    var db = require(global.pathTo('/db/dbModel.js'));
-    var query;
-    
-    query = 'Select '+
-                'l.id as list_id,'+
-                'l.name as list_name,'+
-                'l.user_id as user_id '+
-            'From '+
-                'lists as l '+
-            'Where '+
-                "l.id = ? And "+
-                "l.user_id = ?"+
-            'Limit 1;';
-    
-    // Do the magic
-    db.query( query, [list_id, user_id], function(err, user){
-        if (err){
+    this.find({
+        search: list_id,
+        user_id: user_id,
+        fields:[ 'list_id' ]
+    }, function(err, data){
+        if(err){
             next(err);
-            return;
-        }
-        
-        if (user.length == 1){
-            next(false, new User(user[0]));
         } else {
-            next( new Error('404: ERROR_LIST_NOT_FOUND') );
+            next(false, { list: data.lists[0] });
         }
     });
 };
@@ -348,18 +352,19 @@ Lists.prototype.insertList = function( data, next ){
                     'lists '+
                         '(name, user_id) '+
                     'Values '+
-                        "('?', ?);";
+                        "(?, ?);";
     insertValues.push(data.list_name);
     insertValues.push(data.user_id);
     
     db.query( insertQuery, insertValues, function(err, db_data, fields){
         if (err){
             next(err);
+            return;
         }
         
         data.list_id = db_data.insertId;
         
-        next(false, new List(data));
+        next(false, { list: new List(data) });
     });
     
 };
