@@ -30,7 +30,6 @@ var Transaction = function( data ){
         for (var x in data){
             switch(x){
                 case 'transaction_id':
-                case 'transaction_date':
                 case 'transaction_ammount':
                 case 'transaction_description':
                 case 'user_id':
@@ -39,6 +38,19 @@ var Transaction = function( data ){
                 case 'list_id':
                 case 'list_name':
                     this[x] = data[x];
+                    break;
+                case 'transaction_date':
+                    if (data[x] instanceof Date){
+                        this[x] = data[x];
+                    } else {
+                        this[x] = new Date();
+                        this[x].setDate(data[x].date);
+                        this[x].setMonth(data[x].month);
+                        this[x].setYear(data[x].year);
+                        this[x].setHours(data[x].hours);
+                        this[x].setMinutes(data[x].munites);
+                        this[x].setSeconds(data[x].seconds);
+                    }
                     break;
             }
         }
@@ -60,14 +72,14 @@ Transaction.prototype.delete = function( next ){
         var transactionId = this.transaction_id;
         
         removeTransactionQuery = 
-            'Detele '+
+            'Delete From '+
                 'transactions '+
             'Where '+
                 'transactions.id = ? ;';
         
         db.query( removeTransactionQuery, [transactionId], function(err){
             if (err){
-                next( new Error('ERROR_TRANSACTION_UNNABLE_TO_REMOVE') );
+                next( new Error('ERROR_TRANSACTIONS_FAILURE_ON_REMOVE') );
             } else {
                 next();
             }
@@ -91,29 +103,34 @@ Transaction.prototype.save = function( next ){
         var db = require(global.pathTo('/db/dbModel.js'));
         var query = 
             'Update transactions '+
-                'Set '+
-                   'id = ?, '+
-                   'date = \'?\', '+
-                   'ammount = \'?\', '+
-                   'description = \'?\', '+
-                   'user_id = \'?\', '+
-                   'wallet_id = \'?\', '+
-                   'list_id = \'?\', '+
-                'Where '+
-                    'transaction.id = \'?\' '+
-                'Limit 1;';
+                'Set'+
+                   ' date = ?,'+
+                   ' ammount = ?,'+
+                   ' description = ?,'+
+                   ' user_id = ?,'+
+                   ' wallet_id = ?,';
         var values = [
-            this.transaction_id,
             this.transaction_date,
             this.transaction_ammount,
             this.transaction_description,
             this.user_id,
-            this.wallet_id,
-            this.list_id
+            this.wallet_id
         ];
+        
+        if (this.list_id){
+            query += ' list_id = ?,';
+            values.push(this.list_id);
+        }
+        
+        query = query.slice(0,-1);
+        query += ' Where '+
+                    'transactions.id = ? '+
+                'Limit 1;';
+        values.push(this.transaction_id);
+        
         db.query( query, values, function(err){
             if (err){
-                next(err);
+                next(new Error('ERROR_TRANSACTIONS_FAILURE_ON_SAVE_TRANSACTION'));
             } else {
                 next(false);
             }
@@ -147,7 +164,7 @@ Transaction.prototype.export = function(){
             date: this.transaction_date.getDate(),
             month: this.transaction_date.getMonth(),
             year: this.transaction_date.getFullYear(),
-            hours: this.transaction_date.gethours(),
+            hours: this.transaction_date.getHours(),
             minutes: this.transaction_date.getMinutes(),
             seconds: this.transaction_date.getSeconds()
         },
@@ -156,7 +173,8 @@ Transaction.prototype.export = function(){
         wallet_id: this.wallet_id,
         wallet_name: this.wallet_name,
         list_id: this.list_id,
-        list_name: this.list_name
+        list_name: this.list_name,
+        user_id: this.user_id
     };
 };
 
@@ -183,15 +201,15 @@ var Transactions = function(){};
  * @param {function} next A callback function
  * @returns {undefined}
  */
-Transaction.prototype.find = function( find, next ){
+Transactions.prototype.find = function( find, next ){
     
     var db = require(global.pathTo('/db/dbModel.js'));
     var query;
     var values = [];
         
     try{
-        if (typeof find.user_id === 'undefined'){
-            throw new Error('ERROR_WALLETS_INVALID_USER_ID');
+        if (typeof find.userId === 'undefined'){
+            throw new Error('ERROR_TRANSACTIONS_INVALID_USER_PARAM');
         }
         
         if (typeof find.search === 'undefined'){
@@ -200,19 +218,34 @@ Transaction.prototype.find = function( find, next ){
         
         if (typeof find.page === 'undefined'){
             find.page = 0;
+        } else if (find.page < 0){
+            find.page = 0;
         }
         
-        if (typeof find.list_id === 'undefined'){
-            find.list_id = null;
+        if (!find.items){
+            find.items = 9;
         }
         
-        if (typeof find.wallet_id === 'undefined'){
-            find.wallet_id = null;
+        if (find.items > 100){
+            find.items = 100;
         }
         
-        if (typeof find.transaction_id === 'undefined'){
-            find.transaction_id = null;
+        if (find.items < 9){
+            find.items = 9;
         }
+        
+//        if (!find.start_date){
+//            find.start_date = new Date();
+//            if (find.start_date.getMonth() == 0){
+//                find.start_date.setMonth(11);
+//            } else {
+//                find.start_date.setMonth( find.start_date.getMonth()-1 );
+//            }
+//        }
+//        
+//        if (!find.endDate){
+//            find.endDate = new Date();
+//        }
         
         // Start tu build query
         query = 
@@ -220,7 +253,7 @@ Transaction.prototype.find = function( find, next ){
                 't.id as transaction_id, '+
                 't.ammount as transaction_ammount, '+
                 't.date as transaction_date, '+
-                't,description as transaction_description, '+
+                't.description as transaction_description, '+
                 'w.id as wallet_id, '+
                 'w.name as wallet_name, '+
                 'l.id as list_id, '+
@@ -234,42 +267,80 @@ Transaction.prototype.find = function( find, next ){
             'Where '+
                 'w.user_id = ? ';
 
-        values.push(find.user_id);
+        values.push(find.userId);
         
         if (find.search){
             // Find by key
-            var nameString = find.search.replace(/\s/g, '%');
-            query += "And t.description Like '%?%' ";
-            values.push(nameString);
-        } else {
-            // List all
-            // Nothing to do
+            query += ' And (';
+            if (find.fields){
+                for(var x in find.fields){
+                    switch(find.fields[x]){
+                        case 'transaction_id':
+                            query += ' t.id = ? Or';
+                            values.push(find.search);
+                            break;
+                        case 'wallet_name':
+                            query += ' w.name Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            break;
+                            
+                        case 'list_name':
+                            query += ' l.name Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            break;
+                            
+                        case 'transaction_description':
+                            query += ' t.description Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            break;
+                            
+                        case 'wallet_name':
+                            query += ' w.name Like ? Or';
+                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            break;
+                    }
+                }
+            } else {
+                query += ' t.description Like ? Or';
+                query += ' w.name Like ? Or';
+                query += ' l.name Like ? Or';
+                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+            }
+            query = query.slice(0, -2);
+            query += ') ';
         }
         
-        // Wallet filter
-        if (find.wallet_id != null){
-            query += "And t.wallet_id = ? ";
-            values.push(find.wallet_id);
+        // Lists and Wallets
+        if (find.walletId){
+            query += ' And t.wallet_id = ?';
+            values.push(find.walletId);
         }
         
-        // List filter
-        if (find.list_id != null){
-            query += "And t.list_id = ? ";
-            values.push(find.list_id);
+        if (find.listId){
+            query += ' And t.list_id = ?';
+            values.push(find.listId);
+        }
+
+        // Date range
+        if (find.start_date){
+            query += 'And t.date > ? ';
+            values.push(find.start_date);
         }
         
-        // transaction_id
-        if (find.transaction_id != null){
-            query += "And t.transaction_id = ? ";
-            values.push(find.transaction_id);
+        if (find.end_date){
+            query += 'And t.date < ? ';
+            values.push(find.end_date);
         }
         
         // Sort and order
-        query += ' Order By w.date Asc ';
+        query += ' Order By t.date Asc ';
     
         // Pagination
-        query += ' Limit ?, 19';
-        values.push((find.page * 19));
+        query += ' Limit ?, ?';
+        values.push((find.page * find.items));
+        values.push(find.items);
     
         // End query
         query += ';';
@@ -286,7 +357,7 @@ Transaction.prototype.find = function( find, next ){
                 list.push(new Transaction(data[x]));
             }
 
-            next(false, list);
+            next(false, { transactions: list });
         });
     } catch(err) {
         next(err);
@@ -304,24 +375,25 @@ Transaction.prototype.find = function( find, next ){
  */
 Transactions.prototype.getTransactionById = function( user_id, transaction_id, next ){
     this.find({
-        user_id: user_id,
-        transaction_id: transaction_id
+        userId: user_id,
+        search: transaction_id,
+        fields: ['transaction_id']
     }, function(err, data){
         if (err){
             next(err);
             return;
         }
         
-        if (data.length === 1){
-            next(false, data[0]);
+        if (data.transactions.length === 1){
+            next(false, { transaction: data.transactions[0]} );
         } else {
-            next(new Error('404: ERROR_TRANSACTION_NOT_FOUND'));
+            next(new Error('ERROR_TRANSACTIONS_NOT_FOUND'));
         }
     });
 };
 
 /**
- * Wallets.insertTransaction()
+ * Transactions.insertTransaction()
  * Insert a new Transaction in the database
  * 
  * @param {object} data A Transaction Object or an abstract transaction object
@@ -336,7 +408,7 @@ Transactions.prototype.getTransactionById = function( user_id, transaction_id, n
  * @param {function} next Callback function
  * @returns {undefined}
  */
-Transactions.prototype.insertWallet = function( data, next ){
+Transactions.prototype.insertTransaction = function( data, next ){
     var db = require(global.pathTo('/db/dbModel.js'));
     var query;
     var fieldsQuery;
@@ -345,11 +417,11 @@ Transactions.prototype.insertWallet = function( data, next ){
     
     query = 
         'Insert Into '+
-            'wallets '+
+            'transactions '+
                 '(';
     
     fieldsQuery = 'user_id, ammount, date, description, wallet_id,';
-    valuesQuery = '?, ?, \'?\', \'?\', ?,';
+    valuesQuery = '?, ?, ?, ?, ?,';
         
     insertValues.push(data.user_id);
     insertValues.push(data.transaction_ammount);
@@ -365,7 +437,7 @@ Transactions.prototype.insertWallet = function( data, next ){
     
     // remove extra (,)
     fieldsQuery = fieldsQuery.slice(0, -1);
-    valuesQuery = fieldsQuery.slice(0, -1);
+    valuesQuery = valuesQuery.slice(0, -1);
     
     // Close Query
     query += fieldsQuery + ') Values (' + valuesQuery + ');';
@@ -373,11 +445,12 @@ Transactions.prototype.insertWallet = function( data, next ){
     db.query( query, insertValues, function(err, db_data, fields){
         if (err){
             next(err);
+            return;
         }
         
         data.transaction_id = db_data.insertId;
         
-        next(false, new Transaction(data));
+        next(false, { transaction: new Transaction(data) });
     });
     
 };
@@ -399,7 +472,7 @@ Transactions.prototype.insertWallet = function( data, next ){
  * }
  * @returns {Transaction}
  */
-Transaction.prototype.factory = function( transaction_data ){
+Transactions.prototype.factory = function( transaction_data ){
     return new Transaction( transaction_data );
 };
 

@@ -8,7 +8,7 @@
  */
 
 //var appController = require(global.pathTo('/main/mainController.js'));
-//var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
+var transactionControler = require(global.pathTo('/transactions/transactionController.js'));
 var walletControler = require(global.pathTo('/wallets/walletController.js'));
 var listControler = require(global.pathTo('/lists/listController.js'));
 var userControler = require(global.pathTo('/users/userController.js'));
@@ -50,11 +50,11 @@ function routeSetup(app, express){
     /*
      * Transactions
      */
-    app.get('/api/v1/transactions/', underConstruction); // All transactions
-    app.post('/api/v1/transactions/', underConstruction); // New Transactions
-    app.get('/api/v1/transactions/:transactionId', underConstruction); // Single Transaction
-    app.post('/api/v1/transactions/:transactionId', underConstruction); // Update single
-    app.post('/api/v1/transactions/:transactionId/delete', underConstruction); // Delete transaction
+    app.get('/api/v1/transactions/', transactionControler.find); // All transactions
+    app.post('/api/v1/transactions/', transactionControler.insert); // New Transactions
+    app.get('/api/v1/transactions/:transactionId', transactionControler.get); // Single Transaction
+    app.post('/api/v1/transactions/:transactionId', transactionControler.save); // Update single
+    app.post('/api/v1/transactions/:transactionId/delete', transactionControler.delete); // Delete transaction
     
     /*
      * Wallets

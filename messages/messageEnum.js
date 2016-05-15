@@ -21,6 +21,24 @@ module.exports = {
         }
     },
     
+    // TRANSACTIONS
+    ERROR_TRANSACTIONS_INVALID_ID_PARAM: { message: 'Parâmetro usuário é inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_WALLET_PARAM: { message: 'Parâmetro carteira é inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_SEARCH_QUERY: { message: 'Parâmetro de pesquisa inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_PAGE: { message: 'Page argument must be an integer', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_LIST_SIZE: { message: 'Items per page argument must be an integer and lower or equals 100', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_SORT_PARAM: { message: 'Sort argument must be a string', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_ID_PARAM: { message: 'Referência da transação inválida', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_DESCRIPTION_PARAM: { message: 'Parâmetro Descrição inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_AMMOUNT_PARAM: { message: 'Parâmetro Quantia inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_DATE_PARAM: { message: 'Parâmetro Data inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_USER_PARAM: { message: 'Parâmetro User inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_LIST_PARAM: { message: 'Parâmetro Lista inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_INVALID_TRANSACTION_PARAM: { message: 'Parâmetro Transação inválido', code: statusEnum.BAD_REQUEST },
+    ERROR_TRANSACTIONS_FAILURE_ON_REMOVE: { message: 'Falha ao remover transação', code: statusEnum.ERROR },
+    ERROR_TRANSACTIONS_FAILURE_ON_SAVE_TRANSACTION: { message: 'Falha ao salvar transação', code: statusEnum.ERROR },
+    ERROR_TRANSACTIONS_NOT_FOUND: { message: 'Transação não encontrada', code: statusEnum.ERROR },
+    
     // WALLETS
     ERROR_WALLETS_INVALID_SEARCH_QUERY: { message: 'Search query must be a string', code: statusEnum.BAD_REQUEST },
     ERROR_WALLETS_INVALID_PAGE: { message: 'Page argument must be an integer', code: statusEnum.BAD_REQUEST },
