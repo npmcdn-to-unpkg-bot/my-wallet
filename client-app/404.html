@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!--
+My Wallet is an Money controll application with Node.js and Angular.js
+This software is an personal experiment and it is free for general use
+@license: MIT
+@author: max.andriani@gmail.com
+@version: alpha
+-->
+<html>
+    <head>
+        <title>My Wallet</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- styles -->
+        <link rel="stylesheet" type="text/css" href="app/assets/css/bootstrap.css">
+        
+        <link rel="stylesheet" type="text/css" href="app/assets/css/header.css">
+        <link rel="stylesheet" type="text/css" href="app/assets/css/toolbar.css">
+        <link rel="stylesheet" type="text/css" href="app/assets/css/content.css">
+        <link rel="stylesheet" type="text/css" href="app/assets/css/footer.css">
+        
+        <link rel="stylesheet" type="text/css" href="app/assets/css/content-transaction.css">
+        
+    </head>
+    <body>
+        <!-- header -->
+        <header class="header">
+            <!-- bootstrap -->
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-default">
+              <div class="container">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Menu</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">My Wallet</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                  <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Transações</a></li>
+                    <li><a href="#about">Carteiras</a></li>
+                    <li><a href="#contact">Listas de custos</a></li>
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Maxmiliano Andriani<span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Meu cadastro</a></li>
+                        <li><a href="#">Alterar senha</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Sair</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div><!--/.nav-collapse -->
+              </div>
+            </nav><!-- // bootstrap -->
+        </header> <!-- // header -->
+        
+        <!-- modular area -->
+        
+        <!-- page header -->
+        <div class="page-header">
+            <!-- bootstrap -->
+            <div class="container">
+                <!-- breadcrumb -->
+                <ol class="breadcrumb">
+                    <li><a href="#">My Wallet</a></li>
+                    <li class="active">Transações</li>
+                </ol>
+
+                <!-- page title -->
+                <h2>Minhas transações</h2>
+            </div> <!-- // bootstrap -->
+        </div> <!-- // page-header -->
+        
+        <!-- content -->
+        <div class="content content-transaction">
+            <!-- bootstrap -->
+            <div class="container">
+                <div class="row">
+                    <!-- left-site -->
+                    <div class="col-sm-12">
+                        
+                        <!-- bootstrap panel -->
+                        <div class="panel panel-default">
+                            <!-- Default panel contents -->
+                            <div class="panel-heading">
+                                <span>Transações</span>
+                                <span class="label label-default right">Saldo: R$ -(45,00)</span>
+                            </div>
+                            
+                            <div class="panel-body">
+                                <!-- toolbar -->
+                                <div class="btn-group" role="group" aria-label="Ações">
+                                    <!-- dropdown group -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Nova <span class="caret"></span>
+                                        </button>
+
+                                        <ul class="dropdown-menu">
+                                          <li><a href="#">Nova transação</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="#">Nova carteira</a></li>
+                                          <li><a href="#">Nova lista</a></li>
+                                        </ul>
+                                    </div> <!-- // dorpdown group -->
+
+                                    <button type="button" class="btn btn-default">Editar</button>
+                                    <button type="button" class="btn btn-default btn-danger">Remover</button>
+                                </div>
+
+                                <div class="btn-group" role="group" aria-label="Ações">
+                                    <button type="button" class="btn btn-default">Atualizar</button>
+                                </div>
+                                <!-- // toolbar -->
+                            </div>
+                            
+                            <!-- transaction table -->
+                            <table class="table table-transactions">
+                                
+                                <thead>
+                                    <tr>
+                                        <th class="check">
+                                            <input type="checkbox" title="Selecionar todos" name="check_all" value="1" />
+                                        </th>
+                                        <th class="date">Data</th>
+                                        <th class="ammount">Valor</th>
+                                        <th class="description">Descrição</th>
+                                        <th class="wallet">Carteira</th>
+                                        <th class="actions">Ações</th>
+                                    </tr>
+                                </thead>
+                                
+                                <tbody>
+                                    <tr data-transaction-id="1" class="transaction transaction-credit">
+                                        <td class="check">
+                                            <input type="checkbox" title="Selecionar todos" name="check" />
+                                        </td>
+                                        <td class="date"><span>25/04/2016</span></td>
+                                        <td class="ammount">R$ <span>59,45</span></td>
+                                        <td class="description">Recebimento de Fulano de tal</td>
+                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
+                                        <td class="actions">{{ TODO }}</td>
+                                    </tr>
+                                    <tr data-transaction-id="2" class="transaction transaction-credit">
+                                        <td class="check">
+                                            <input type="checkbox" title="Selecionar todos" name="check" />
+                                        </td>
+                                        <td class="date"><span>25/04/2016</span></td>
+                                        <td class="ammount">R$ <span>59,45</span></td>
+                                        <td class="description">Recebimento de Fulano de tal</td>
+                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
+                                        <td class="actions">{{ TODO }}</td>
+                                    </tr>
+                                    <tr data-transaction-id="3" class="transaction transaction-debit">
+                                        <td class="check">
+                                            <input type="checkbox" title="Selecionar todos" name="check" />
+                                        </td>
+                                        <td class="date"><span>25/04/2016</span></td>
+                                        <td class="ammount">R$ <span>(-59,45)</span></td>
+                                        <td class="description">Recebimento de Fulano de tal</td>
+                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
+                                        <td class="actions">{{ TODO }}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="footer" colspan="6">
+                                            <div class="total total-credit">
+                                                <span>Total de receitas:</span>
+                                                <span class="value">R$ 59,46</span>
+                                            </div>
+                                            <div class="total total-debit">
+                                                <span>Total de despesas:</span>
+                                                <span class="value">R$ (-59,46)</span>
+                                            </div>
+                                            <div class="total total-ammout positive">
+                                                <span>Saldo:</span>
+                                                <span class="value">R$ 0,00</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                                
+                            </table> <!-- // transaction table -->
+                            
+                        </div> <!-- // bootstrap panel -->
+
+                        
+                    </div> <!-- // left-side -->
+
+                    <!-- right-side -->
+                    <div class="col-sm-4 hide">
+                        
+                        <p>//TODO </p>
+                        <p>My Sidebar</p>
+                        
+                    </div> <!-- // right-side -->
+                </div>
+            </div> <!-- // bootstrap -->
+        </div> <!-- // content -->
+        
+        <!-- // modular area -->
+        
+        <!-- footer -->
+        <footer class="footer">
+            <!-- bootstrap -->
+            <div class="container">
+                
+                <p>//TODO</p>
+                <p>My footer</p>
+                
+            </div><!-- // bootstrap -->
+        </footer>
+        <!-- // footer -->
+        
+        <!-- javascript -->
+        <script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>
+        <script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>
+        
+    </body>
+</html>

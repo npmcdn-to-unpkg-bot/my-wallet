@@ -5,9 +5,19 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
+var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
+
 var startApplication = function(req, res){
-    if (req.currentUser){
-        res.sendfile(global.pathTo('/client-app/restrict.html'));
+    if (req.cookies.myWalletAuth){
+        var session = sessionModel.getSession(req);
+        session.getCurrentUser(req.cookies.myWalletAuth, function(err, user){
+            if (err){
+                res.sendFile(global.pathTo('/client-app/public.html'));
+            } else {
+                req.currentUser = user;
+                res.sendfile(global.pathTo('/client-app/restrict.html'));
+            }
+        });
     } else {
         res.sendFile(global.pathTo('/client-app/public.html'));
     }

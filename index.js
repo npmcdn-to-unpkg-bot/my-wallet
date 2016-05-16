@@ -24,6 +24,7 @@ var routes = require(global.pathTo('/routes.js'));
 var session = require('client-sessions');
 var bodyParser = require('body-parser');
 var sessionModel = require(global.pathTo('/sessions/sessionModel.js'));
+var cookieParser = require('cookie-parser');
 
 // Change the session managment to Mozilla
 app.use(session({
@@ -32,6 +33,9 @@ app.use(session({
   duration: global.config.SESSION_DURATION,
   activeDuration: global.config.SESSION_LIFETIME
 }));
+
+// Cookies
+app.use(cookieParser());
 
 // Add CORS
 app.use(function(req, res, next){

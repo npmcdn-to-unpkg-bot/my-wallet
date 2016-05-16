@@ -86,6 +86,7 @@ function routeSetup(app, express){
      * Sessions
      */
     app.post('/api/v1/sessions/auth/', sessionControler.auth);
+    app.post('/api/v1/sessions/renew/', sessionControler.renew);
     app.get('/api/v1/sessions/logout/', sessionControler.logout);
     
     /*

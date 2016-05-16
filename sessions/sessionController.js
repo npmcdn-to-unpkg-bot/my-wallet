@@ -51,13 +51,29 @@ module.exports = {
         }
         
     },
+    renew: function(req, res){
+        var json = bodyBuilder.getBuilder(res);
+        var currentSession = new sessionModel.getSession(req);
+        try{
+            currentSession.getCurrentUser(function(err, user){
+                if(err){
+                    json.buildError(err);
+                } else {
+                    var auth = currentSession.generateToken(user);
+                    json.buildError({auth: auth});
+                }
+            });
+        } catch(err) {
+            json.buildError(err);
+        }
+    },
     logout: function(req, res, next){
         var currentSession = new sessionModel.getSession(req);
         var json = bodyBuilder.getBuilder(res);
         
         currentSession.logout(function(err){
             if (err){
-                json.build(err, 500);
+                json.buildError(err);
                 return;
             }
             

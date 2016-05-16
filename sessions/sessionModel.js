@@ -34,7 +34,7 @@ Session.prototype.auth = function(email, pass, next){
             }
             
             _self.user = data.users[0];
-            var auth = jwt.sign( _self.user, global.config.SESSION_SECRET, jwtConfig );
+            var auth = _self.generateToken(_self.user);
             
             _self.req.session = {
                 auth: auth
@@ -42,6 +42,10 @@ Session.prototype.auth = function(email, pass, next){
             
             next(false, {auth: auth});
     });
+};
+
+Session.prototype.generateToken = function(user){
+    return jwt.sign( user, global.config.SESSION_SECRET, jwtConfig );
 };
 
 Session.prototype.logout = function(next){
