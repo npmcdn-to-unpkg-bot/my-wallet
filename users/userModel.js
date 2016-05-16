@@ -567,9 +567,10 @@ Users.prototype.insertUser = function( user_data, next ){
         user.addAccount( account , function(err){
             if (err){
                 next(err);
+                return;
             }
             
-            next(false, user);
+            next(false, { user: user });
         });
     };
     
