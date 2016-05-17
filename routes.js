@@ -98,7 +98,7 @@ function routeSetup(app, express){
     });
     
     app.get('*', function(req, res){
-        res.sendFile(global.pathTo('/client-app/404.html'));
+        res.status(404).sendFile(global.pathTo('/client-app/404.html'));
     });
 }
 
