@@ -8,7 +8,7 @@
 'use strict';
 
 // Instance angular app
-var app = angular.module('myWallet', []);
+var app = angular.module('myWallet', [ 'ngRoute' ]);
 
 /**
  * Clear Unpleasury template cache

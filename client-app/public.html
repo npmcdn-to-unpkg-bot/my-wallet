@@ -20,7 +20,7 @@ This software is an personal experiment and it is free for general use
         <link rel="stylesheet" type="text/css" href="app/assets/css/content.css">
         <link rel="stylesheet" type="text/css" href="app/assets/css/footer.css">
         
-        <link rel="stylesheet" type="text/css" href="app/assets/css/content-transaction.css">
+        <link rel="stylesheet" type="text/css" href="app/assets/css/content-public.css">
         
     </head>
     <body ng-app="myWallet">
@@ -53,36 +53,12 @@ This software is an personal experiment and it is free for general use
         
         <!-- modular area -->
         
+        <!-- angular-content -->
+        <div class="content angular-content" data-ng-view></div>
+        
         <!-- content -->
         <div class="content content-transaction">
-            <!-- bootstrap -->
-            <div class="container">
-                <div class="row">
-                    <!-- left-site -->
-                    <div class="col-sm-6 col-sm-offset-3">
-                        
-                        <div class="page-header">
-                            <!-- page title -->
-                            <h2>Cadastro</h2>
-                        </div>
-                        
-                        <!-- bootstrap panel -->
-                        <div class="panel panel-default">
-                            <!-- Default panel contents -->
-                            <div class="panel-heading">
-                                <span>Precisamos desses dados para proteger suas informações</span>
-                            </div>
-                            
-                            <div class="panel-body">
-                            </div>
-                            
-                        </div> <!-- // bootstrap panel -->
-
-                        
-                    </div> <!-- // left-side -->
-
-                </div>
-            </div> <!-- // bootstrap -->
+            <h2>Vendas</h2>                
         </div> <!-- // content -->
         
         <!-- // modular area -->
@@ -91,8 +67,13 @@ This software is an personal experiment and it is free for general use
         <script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>
         <script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>
         <script type="text/javascript" src="app/angular/angular-1.5.5/angular.min.js"></script>
+        <script type="text/javascript" src="app/angular/angular-1.5.5/angular-route.js"></script>
         <script type="text/javascript" src="app/myWallet.js"></script>
         <script type="text/javascript" src="app/directives.js"></script>
+        <script type="text/javascript" src="app/public-routes.js"></script>
+        <script type="text/javascript" src="app/public/public-controller.js"></script>
+        <script type="text/javascript" src="app/public/login-form-controller.js"></script>
+        <script type="text/javascript" src="app/public/register-form-controller.js"></script>
         
     </body>
 </html>

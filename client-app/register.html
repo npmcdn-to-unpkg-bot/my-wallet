@@ -23,7 +23,7 @@ This software is an personal experiment and it is free for general use
         <link rel="stylesheet" type="text/css" href="app/assets/css/content-transaction.css">
         
     </head>
-    <body>
+    <body data-ng-app="myWalley">
         <!-- header -->
         <header class="header">
             <!-- bootstrap -->
@@ -46,10 +46,7 @@ This software is an personal experiment and it is free for general use
                   </ul>
                   <!-- buttons -->
                   <div class="navbar-form navbar-right">
-                      <div class="form-group">
-                          <button title="Experimente agora!" class="btn btn-default btn-register">Experimente agora mesmo</button>
-                          <button title="Acessar minha conta" class="btn btn-default btn-primary btn-access">Acessar</button>
-                      </div>
+                      <sigun-buttons></sigun-buttons>
                   </div>
                 </div><!--/.nav-collapse -->
               </div>
@@ -58,112 +55,16 @@ This software is an personal experiment and it is free for general use
         
         <!-- modular area -->
         
-        <!-- content -->
-        <div class="content content-transaction">
-            <!-- bootstrap -->
-            <div class="container">
-                <div class="row">
-                    <!-- left-site -->
-                    <div class="col-sm-6 col-sm-offset-3">
-                        
-                        <div class="page-header">
-                            <!-- page title -->
-                            <h2>Cadastro</h2>
-                        </div>
-                        
-                        <!-- bootstrap panel -->
-                        <div class="panel panel-default">
-                            <!-- Default panel contents -->
-                            <div class="panel-heading">
-                                <span>Precisamos desses dados para proteger suas informações</span>
-                            </div>
-                            
-                            <div class="panel-body">
-                                <form id="registerForm" action="#" method="post" class="form register-form">
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <label class="control-label" for="register_user_name">Nome completo</label>
-                                        </div>
-                                        <div class="form-group col-sm-8">
-                                            <div class="input-group input-text">
-                                                <input type="text" class="form-control" name="user_name" id="register_user_name" placeholder="João da Silva">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <label class="control-label" for="register_user_email">Seu email</label>
-                                        </div>
-                                        <div class="form-group col-sm-8">
-                                            <div class="input-group input-email">
-                                                <span class="input-group-addon" id="addon-email">
-                                                    <span class="glyphicon glyphicon-envelope"></span>
-                                                </span>
-                                                <input type="email" class="form-control" name="user_email" id="register_user_email" placeholder="joao@silva.com" aria-describedby="addon-email">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <label class="control-label" for="register_user_password">Crie uma senha</label>
-                                        </div>
-                                        <div class="form-group col-sm-8">
-                                            <div class="input-group">
-                                                <span class="input-group-addon" id="addon-password">
-                                                    <span class="glyphicon glyphicon-lock"></span>
-                                                </span>
-                                                <input type="email" class="form-control" name="user_password" id="register_user_password" placeholder="schhh" aria-describedby="addon-password">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <label class="control-label" for="register_user_password_2">Repita a senha</label>
-                                        </div>
-                                        <div class="form-group col-sm-8">
-                                            <div class="input-group">
-                                                <span class="input-group-addon" id="addon-password-2">
-                                                    <span class="glyphicon glyphicon-lock"></span>
-                                                </span>
-                                                <input type="email" class="form-control" name="user_password-2" id="register_user_password_2" aria-describedby="addon-password-2">
-                                                <span class="input-group-btn">
-                                                    <button type="button" class="btn btn-default btn-show-pass">
-                                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                                    </button>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-8 col-sm-offset-4">
-                                            <div class="input-group">
-                                                <button type="submit" class="btn btn-default btn-primary">Cadastrar</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </form>
-                            </div>
-                            
-                        </div> <!-- // bootstrap panel -->
-
-                        
-                    </div> <!-- // left-side -->
-
-                </div>
-            </div> <!-- // bootstrap -->
-        </div> <!-- // content -->
+        
         
         <!-- // modular area -->
         
         <!-- javascript -->
         <script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>
         <script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>
+        <script type="text/javascript" src="app/angular/angular-1.5.5/angular.min.js"></script>
+        <script type="text/javascript" src="app/myWallet.js"></script>
+        <script type="text/javascript" src="app/directives.js"></script>
         
     </body>
 </html>
