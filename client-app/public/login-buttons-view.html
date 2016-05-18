@@ -1,5 +1,5 @@
 <div class="navbar-form navbar-right">
     <div class="form-group">
-        <button data-ng-repeat="button in page.buttons" data-ng-click="{{button.onClick}}" title="{button.label}" class="btn btn-default">{{button.label}}</button>
+        <button data-ng-click="goTo(button.url)" title="{button.label}" class="btn btn-default">{{button.label}}</button>
     </div>
 </div>

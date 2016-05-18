@@ -6,7 +6,7 @@
  */
 var app = angular.module('myWallet');
 
-app.controller('LoginFormController', [ '$scope', '$cookies', 'SessionService', 'UiMessagesService', function($scope, $cookies, sessions, ui) {
+app.controller('LoginFormController', [ '$scope', 'SessionService', 'UiMessagesService', function($scope, sessions, ui) {
     ui.clear();
     
     $scope.page = {};
@@ -25,7 +25,6 @@ app.controller('LoginFormController', [ '$scope', '$cookies', 'SessionService', 
         var promise = sessions.auth( $scope.data );
         promise.then(function( data ){
             // success
-            $cookies.put('myWalletAuth', data.auth);
             window.location.hash = '';
             window.location.reload();
         }, function( err ){

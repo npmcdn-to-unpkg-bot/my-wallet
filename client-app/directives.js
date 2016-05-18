@@ -13,7 +13,7 @@ var app = angular.module('myWallet');
 app.directive('uiMessages', function() {
     return {
 	restrict : 'E',
-	templateUrl : 'app/common/ui-messages/messages-list.html',
+	templateUrl : 'app/ui-messages/messages-list.html',
 	controller : 'UiMessageController'
     };
 });
@@ -21,7 +21,7 @@ app.directive('uiMessages', function() {
 app.directive('navbarTop', function() {
     return {
 	restrict : 'EA',
-	templateUrl : 'app/common/navbar/navbar-top.html',
+	templateUrl : 'app/navbar/navbar-top.html',
 	controller : 'NavbarController'
     };
 });
@@ -29,23 +29,7 @@ app.directive('navbarTop', function() {
 app.directive('sigunButtons', function() {
     return {
 	restrict : 'EA',
-	templateUrl : 'app/common/login/signup-buttons.html',
-	controller : 'SiginupButtonController'
-    };
-});
-
-app.directive('registerForm', function() {
-    return {
-	restrict : 'EA',
-	templateUrl : 'app/common/login/register-form.html',
-	controller : 'RegisterFormController'
-    };
-});
-
-app.directive('loginForm', function() {
-    return {
-	restrict : 'EA',
-	templateUrl : 'app/common/login/login-form.html',
-	controller : 'LoginFormController'
+	templateUrl : 'app/public/login-buttons-view.html',
+	controller : 'LoginButtonsController'
     };
 });

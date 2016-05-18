@@ -12,4 +12,8 @@ app.controller('LoginButtonsController', ['$scope', function( $scope ){
             { url: '#register', label: 'Exprimente agora mesmo', is_primary: false },
             { url: '#login', label: 'Acessar', is_primary: true }
         ];
+        
+        $scope.goTo = function( url ){
+            window.location.hash = url;
+        };
 }]);
