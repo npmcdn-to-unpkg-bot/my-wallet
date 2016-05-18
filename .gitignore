@@ -7,3 +7,4 @@ node_modules/
 
 # IDE and Other issues
 nbproject/
+*.bak
