@@ -1,0 +1,6 @@
+<div class="errors-list">
+	<div class="alert alert-{{message.level}}" data-ng-repeat="message in messages">
+		<button class="close" data-ng-click="ui.remove($index)">&times;</button>
+    	<strong>Atenção!</strong> {{message.message}}
+	</div>
+</div>
