@@ -101,11 +101,11 @@ function insertUser(req, res){
             throw new Error('ERROR_USER_INVALID_PASSWORD');
         }
 
-        userModel.insertUser(userData, function(err, user){
+        userModel.insertUser(userData, function(err, data){
             if (err){
                 json.buildError(err);
             } else {
-                json.build(user.export(), statusEnum.CREATED);
+                json.build({ user: data.user.export() }, statusEnum.CREATED);
             }
         });
     } catch(err) {

@@ -44,10 +44,7 @@ module.exports = {
             });
             
         } catch (e) {
-            json.build(e, 500);
-            if (next){
-                next();
-            }
+            json.buildError(e);
         }
         
     },

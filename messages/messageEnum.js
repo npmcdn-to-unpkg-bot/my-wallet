@@ -12,10 +12,13 @@ module.exports = {
     // GET Message
     get: function( eNum ){
         if (typeof this[ eNum ] !== 'undefined'){
-            return this[ eNum ];
+            var msg = this[ eNum ];
+            msg.key = eNum;
+            return msg;
         } else {
             return {
                 message: eNum,
+                key: eNum,
                 code: 500
             };
         }
