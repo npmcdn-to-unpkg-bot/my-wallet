@@ -6,17 +6,18 @@
  */
 var app = angular.module('myWallet');
 
-app.controller('LoginFormController', [ '$scope', 'SessionService', 'UiMessagesService', function($scope, sessions, ui) {
+app.controller('LoginFormController', [ '$scope', 'SessionsService', 'UiMessagesService', function($scope, sessions, ui) {
     ui.clear();
     
     $scope.page = {};
-    $scope.page.title = 'Cadastro';
+    $scope.page.title = 'Acessar sua carteira';
+    $scope.page.description = 'Informe seus dados de acesso';
     
     $scope.formStatus = true;
     
     $scope.data = {
         user_email: null,
-        user_password: null
+        password: null
     };
     
     $scope.doLogin = function(){
@@ -29,8 +30,8 @@ app.controller('LoginFormController', [ '$scope', 'SessionService', 'UiMessagesS
             window.location.reload();
         }, function( err ){
             // error
-            ui.error(err);
             $scope.formStatus = true;
+            ui.error(err);
         });
         
     };

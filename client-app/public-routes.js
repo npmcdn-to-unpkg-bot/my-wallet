@@ -26,5 +26,5 @@ app.config(function($routeProvider) {
     .when('/login', {
 	templateUrl: 'app/public/login-form-view.html',
 	controller: 'LoginFormController'
-    })
+    });
 });

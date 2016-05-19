@@ -3,7 +3,7 @@ var app = angular.module('myWallet');
 app.controller('UiMessageController', [ '$scope', 'UiMessagesService',
 function($scope, ui) {
 
-    $scope.messages = ui.getMessages();
+    $scope.messages = ui.messages;
     $scope.ui = ui;
 
     $scope.$watch(function(ui) {

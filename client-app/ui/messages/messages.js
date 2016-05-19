@@ -8,8 +8,9 @@ var app = angular.module('myWallet');
 app.service('UiMessagesService', [ '$timeout', function($timeout) {
 
     var count = 1;
-    var messages = [];
     var that = this;
+
+    this.messages = [];
 
     this.incrementCount = function() {
 	count++;
@@ -49,27 +50,31 @@ app.service('UiMessagesService', [ '$timeout', function($timeout) {
 	    message : that.getErrorMessage(message, val)
 	};
 
-	messages.push(message);
+	this.messages.push(message);
 
-	$timeout(function() {
-	    messages.splice(messages.indexOf(message), 1);
-	}, 4000);
+//	$timeout(function() {
+//	    messages.splice(messages.indexOf(message), 1);
+//	}, 4000);
+    };
+    
+    this.error = function(err){
+        this.add(err.message, 'danger');
     };
 
     this.remove = function(index) {
-	messages.splice(index, 1);
+	this.messages.splice(index, 1);
     };
 
     this.hasMessages = function() {
-	return (messages.length > 0);
+	return (this.messages.length > 0);
     };
 
     this.clear = function() {
-	messages = [];
+	this.messages.length = 0;
     };
 
     this.getMessages = function() {
-	return messages;
+	return this.messages;
     };
 
 } ]);

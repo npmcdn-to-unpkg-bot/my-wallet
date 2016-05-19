@@ -6,46 +6,61 @@
  */
 var app = angular.module('myWallet');
 
-app.controller('RegisterFormController', [ '$scope', '$cookies', 'UserService', 'SessionsService', 'UiMessagesService', function($scope, $cookies, users, sessions, ui) {
-    ui.clear();
+app.controller('RegisterFormController', [ '$scope', '$cookies', 'UsersService', 'SessionsService', 'UiMessagesService', function($scope, $cookies, users, sessions, ui) {
     
     $scope.page = {};
     $scope.page.title = 'Cadastro';
-    $scope.page.description = 'Descrição';
+    $scope.page.description = 'Precisamos desses dados para proteger suas informações';
     
     $scope.formStatus = true;
+    $scope.formPasswordField = 'password';
     
     $scope.data = {
         user_name: null,
         user_email: null,
-        user_password: null,
-        user_password_2: null
+        password: null,
+        password_2: null
+    };
+    
+    $scope.changePasswordField = function(){
+        if ($scope.formPasswordField === 'password'){
+            $scope.formPasswordField = 'text';
+        } else {
+            $scope.formPasswordField = 'password';
+        }
     };
     
     $scope.doRegister = function(){
+        ui.clear();
+        
         $scope.formStatus = false;
         
         var promise = users.insert( $scope.data );
         promise.then(function( data ){
             // success
-            $cookies.put('myWalletAuth', data.auth);
+            if (data.error){
+                $scope.formStatus = true;
+                ui.error(new Error(data.error.key));
+                return;
+            }
+            
             var auth = sessions.auth({ 
-                user_email: data.users.user_email,
-                user_password: $scope.data.password
+                user_email: data.user.user_email,
+                password: $scope.data.password
             });
             
             auth.then(function( data ){
                 window.location.hash = '';
                 window.location.reload();
             }, function(err){
-                ui.error(err);
                 $scope.formStatus = true;
+                ui.error(err);
             });
             
         }, function( err ){
             // error
-            ui.error(err);
             $scope.formStatus = true;
+            ui.error(err);
         });
         
     };

@@ -12,17 +12,41 @@ app.service('SessionsService', ['$cookies', '$q', '$http', function($cookies, $q
         this.currentUser = null;
         
         this.auth = function( userData ){
-            var promisse = $q.defer();
+            var def = $q.defer();
             
-            // TODO
-            // $cookies.put('myWalletAuth', data.auth);
+            $http({
+                url: '/api/v1/sessions/auth',
+                method: 'POST',
+                data: userData
+            }).then(function(response){
+                // Success
+                try {
+                    if (response.data.error){
+                        throw new Error(response.data.error.key);
+                    }
+                    
+                    $cookies.put('myWalletAuth', response.data.auth);
+                    
+                    def.resolve( response.data.auth );
+                } catch (err) {
+                    def.reject(err);
+                }
+            }, function(response){
+                // Error
+            });
             
-            return promisse;
+            return def.promise;
+        };
+        
+        this.logout = function(){
+            $cookies.put('myWalletAuth', '');
+            window.location.hash = '';
+            window.location.reload();
         };
         
         this.getUser = function(){
-            var promisse = $q.defer();
+            var def = $q.defer();
             
-            return promisse;
+            return def.promise;
         };
 }]);
