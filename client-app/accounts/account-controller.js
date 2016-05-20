@@ -20,8 +20,27 @@ app.controller('AccountController', ['$scope', 'ApiService', 'UsersService', 'Ui
     };
     
     // User
-    $scope.user = null
-            
+    $scope.user = null;
+    
+    // Save form
+    $scope.saveFormStatus = true;
+    $scope.data = {
+        user_name: null,
+        user_email: null
+    };
+    $scope.saveUser = function(){
+        $scope.saveFormStatus = false;
+        users.save( $scope.data ).then(function(user){
+            $scope.saveFormStatus = true;
+            $scope.user = user;
+            ui.success('USERS_SAVED_DATA');
+        }, function(err){
+            $scope.saveFormStatus = true;
+            // Error
+            ui.error(err);
+        });
+    };
+    
     // Load information
     $scope.loaded = false;
     
