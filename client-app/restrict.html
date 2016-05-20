@@ -23,9 +23,9 @@ This software is an personal experiment and it is free for general use
         <link rel="stylesheet" type="text/css" href="app/assets/css/content-transaction.css">
         
     </head>
-    <body>
+    <body data-ng-app="myWallet" data-ng-controller="UiController">
         <!-- header -->
-        <header class="header">
+        <header class="header" data-ng-show="loadStatus">
             <!-- bootstrap -->
             <!-- Fixed navbar -->
             <nav class="navbar navbar-default">
@@ -37,31 +37,43 @@ This software is an personal experiment and it is free for general use
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                   </button>
-                  <a class="navbar-brand" href="#">My Wallet</a>
+                  <a class="navbar-brand" href="#">{{page.title}}</a>
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
-                  <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Transações</a></li>
-                    <li><a href="#about">Carteiras</a></li>
-                    <li><a href="#contact">Listas de custos</a></li>
-                  </ul>
-                  <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Maxmiliano Andriani<span class="caret"></span></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">Meu cadastro</a></li>
-                        <li><a href="#">Alterar senha</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="#">Sair</a></li>
-                      </ul>
-                    </li>
-                  </ul>
+                    <ul class="nav navbar-nav" data-ng-show="page.pages">
+                        <li data-ng-repeat="page in page.pages" data-ng-class="{active: isActive(page.slug)}"><a href="{{page.slug}}">{{page.name}}</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown" data-uib-dropdown>
+                            <a href="#/account" data-uib-dropdown-toggle class="dropdown-toggle">
+                                {{user.user_name}} <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="user-nav">
+                                <li><a href="#/account">Meu cadastro</a></li>
+                                <li><a href="#/account" data-ng-click="openPasswordModal()">Alterar senha</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="#/account/logout" data-ng-click="logout()">Sair</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    
+                    
+                    
                 </div><!--/.nav-collapse -->
               </div>
             </nav><!-- // bootstrap -->
         </header> <!-- // header -->
         
         <!-- modular area -->
+        <pre>{{page}}</pre>
+        <pre>{{user}}</pre>
+        
+        <div class="content error-content">
+            <div class="container">
+                <ui-messages></ui-messages>
+            </div>
+        </div>
         
         <!-- page header -->
         <div class="page-header">
@@ -77,6 +89,8 @@ This software is an personal experiment and it is free for general use
                 <h2>Minhas transações</h2>
             </div> <!-- // bootstrap -->
         </div> <!-- // page-header -->
+        
+        <!-- modular area -->
         
         <!-- content -->
         <div class="content content-transaction">
@@ -221,8 +235,28 @@ This software is an personal experiment and it is free for general use
         <!-- // footer -->
         
         <!-- javascript -->
-        <script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>
-        <script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>
+        <!--<script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>-->
+        <!--<script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>-->
+        <script type="text/javascript" src="app/angular/angular-1.5.5/angular.min.js"></script>
+        <script type="text/javascript" src="app/angular/angular-1.5.5/angular-route.js"></script>
+        <script type="text/javascript" src="app/angular/angular-1.5.5/angular-cookies.js"></script>
+        
+        <script type="text/javascript" src="app/uib/ui-bootstrap-tpls-1.3.2.js"></script>
+        
+        <script type="text/javascript" src="app/myWallet.js"></script>
+        <script type="text/javascript" src="app/directives.js"></script>
+        <script type="text/javascript" src="app/restrict-routes.js"></script>
+        
+        <script type="text/javascript" src="app/api/api.js"></script>
+        <script type="text/javascript" src="app/ui/messages/messages.js"></script>
+        <script type="text/javascript" src="app/ui/modals/modals.js"></script>
+        <script type="text/javascript" src="app/sessions/sessions.js"></script>
+        <script type="text/javascript" src="app/users/users.js"></script>
+        
+        <script type="text/javascript" src="app/ui/ui-controller.js"></script>
+        <script type="text/javascript" src="app/ui/modals/password-modal-controller.js"></script>
+        <script type="text/javascript" src="app/ui/modals/auth-modal-controller.js"></script>
+        <script type="text/javascript" src="app/ui/messages/messages-controller.js"></script>
         
     </body>
 </html>

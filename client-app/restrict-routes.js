@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module('myWallet', [ 'ngRoute' ]);
+var app = angular.module('myWallet');
 
 // Routes
 app.config(function($routeProvider) {

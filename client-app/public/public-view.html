@@ -1,10 +1,6 @@
 <!-- content -->
-<ul class="content content-banner">
-    <li class="banner-slide slide-x">
-        <!-- bootstrap -->
-        <div class="container">
-            <h1>Meu slide</h1>
-            <p>Compre essa porra!</li>
-        </div>
-    </li>
-</ul><!-- // content -->
+<div class="content content-banner" data-ng-show="page.banners">
+    <div class="banner-slide slide-x" data-ng-repeat="banner in page.banners">
+        <img data-ng-src="{{banner.image}}" style="width:100%; height: auto;" />
+    </div>
+</div><!-- // content -->

@@ -9,6 +9,16 @@ var app = angular.module('myWallet');
 
 app.service('SessionsService', ['$cookies', '$q', '$http', function($cookies, $q, $http){
         
+        var _parseError = function( promise, response ){
+            if (response instanceof Error){
+                promise.reject(response);
+            } else if (response.data && response.data.error) {
+                promise.reject(new Error(response.data.error.key));
+            } else {
+                promise.reject(new Error('ERROR_CONNECTION_FAILURE'));
+            }
+        };
+        
         this.currentUser = null;
         
         this.auth = function( userData ){
@@ -29,24 +39,20 @@ app.service('SessionsService', ['$cookies', '$q', '$http', function($cookies, $q
                     
                     def.resolve( response.data.auth );
                 } catch (err) {
-                    def.reject(err);
+                    _parseError( def , err );
                 }
             }, function(response){
                 // Error
+                _parseError( def, response );
             });
             
             return def.promise;
         };
         
         this.logout = function(){
-            $cookies.put('myWalletAuth', '');
+            $cookies.put('myWalletAuth', null);
             window.location.hash = '';
             window.location.reload();
         };
         
-        this.getUser = function(){
-            var def = $q.defer();
-            
-            return def.promise;
-        };
 }]);

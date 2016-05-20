@@ -8,7 +8,7 @@
 'use strict';
 
 // Instance angular app
-var app = angular.module('myWallet', [ 'ngRoute', 'ngCookies' ]);
+var app = angular.module('myWallet', [ 'ngRoute', 'ngCookies', 'ui.bootstrap' ]);
 
 /**
  * Clear Unpleasury template cache

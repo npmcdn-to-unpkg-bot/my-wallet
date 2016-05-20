@@ -13,7 +13,7 @@ var app = angular.module('myWallet');
 app.directive('uiMessages', function() {
     return {
 	restrict : 'E',
-	templateUrl : 'app/ui-messages/messages-list.html',
+	templateUrl : 'app/ui/messages/messages-list.html',
 	controller : 'UiMessageController'
     };
 });

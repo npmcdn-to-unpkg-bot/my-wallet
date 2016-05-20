@@ -7,8 +7,37 @@
 
 var app = angular.module('myWallet');
 
-app.service('UsersService', ['$http', '$q', function($http, $q){
+app.service('UsersService', ['ApiService', '$q', 'SessionsService', 'ApiService', function(api, $q, sessions, api){
     // TODO
+    this.currentUser = null;
+    
+    this.getUser = function(){
+        var def = $q.defer();
+
+        try {
+
+            if (this.currentUser){
+                def.resolve(this.currentUser);
+            } else {
+                api.get('/users/details').then(function(response){
+                    // success
+                    if (response.data && response.data.user){
+                        def.resolve(response.data.user);
+                    } else {
+                        def.reject(new Error(response.data.error.key));
+                    }
+                }, function(response){
+                    // error
+                    def.reject(response);
+                });
+            }
+
+        } catch(err) {
+            def.reject(err);
+        }
+
+        return def.promise;
+    };
     
     this.insert = function(data){
         var deferred = $q.defer();

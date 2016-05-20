@@ -11,10 +11,10 @@ app.controller('PublicController', ['$scope', function($scope){
         $scope.page = {};
         $scope.page.banners = [
             {
-                title: 'Meu Slide',
-                description: 'Compre isso',
-                href: 'Link para',
-                image: 'url_to'
+                //title: 'Meu Slide',
+                //description: 'Compre isso',
+                //href: 'Link para',
+                image: '/app/assets/banners/home/wimm.jpg'
             }
         ];
 }]);
