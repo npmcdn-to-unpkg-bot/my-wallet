@@ -17,7 +17,7 @@ app.service('ApiService', ['$http', '$cookies', '$q', 'UiModalsService', functio
                 _onSuccess( promise, response );
             }, function(response){
                 // error
-                _onError( promise, response, httpReq );
+                _onFail( promise, response, httpReq );
             });
     };
     

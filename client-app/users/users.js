@@ -46,7 +46,7 @@ app.service('UsersService', ['ApiService', '$q', 'SessionsService', function(api
             q.reject(err);
         }
         
-        return q;
+        return q.promise;
     };
     
     this.getUser = function(){
@@ -60,7 +60,7 @@ app.service('UsersService', ['ApiService', '$q', 'SessionsService', function(api
                 api.get('/users/details').then(function(response){
                     // success
                     if (response.data && response.data.user){
-                        _self.currentUser = user;
+                        _self.currentUser = response.data.user;
                         def.resolve(response.data.user);
                     } else {
                         def.reject(new Error(response.data.error.key));

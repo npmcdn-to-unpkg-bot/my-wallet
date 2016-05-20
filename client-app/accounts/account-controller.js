@@ -9,6 +9,12 @@ var app = angular.module('myWallet.accounts');
 
 app.controller('AccountController', ['$scope', 'ApiService', 'UsersService', 'UiMessagesService', function( $scope, api, users, ui ){
     
+    // User
+    $scope.user = {
+        user_name: null,
+        user_email: null
+    };
+    
     // page attributes
     $scope.page = {
         title: 'Minha conta',
@@ -19,18 +25,11 @@ app.controller('AccountController', ['$scope', 'ApiService', 'UsersService', 'Ui
         ]
     };
     
-    // User
-    $scope.user = null;
-    
     // Save form
     $scope.saveFormStatus = true;
-    $scope.data = {
-        user_name: null,
-        user_email: null
-    };
     $scope.saveUser = function(){
         $scope.saveFormStatus = false;
-        users.save( $scope.data ).then(function(user){
+        users.save( $scope.user ).then(function(user){
             $scope.saveFormStatus = true;
             $scope.user = user;
             ui.success('USERS_SAVED_DATA');
