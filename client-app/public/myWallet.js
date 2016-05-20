@@ -11,14 +11,10 @@
 var app = angular.module('myWallet', 
     [ 
         'ngRoute',
-        'myWallet.accounts',
         'myWallet.api',
-        'myWallet.lists',
         'myWallet.sessions',
-        'myWallet.transactions',
         'myWallet.ui',
-        'myWallet.users',
-        'myWallet.wallets'
+        'myWallet.users'
     ]);
 
 /**
@@ -30,4 +26,12 @@ app.run(function($rootScope, $templateCache) {
 	    $templateCache.remove(current.templateUrl);
 	}
     });
+});
+
+app.directive('sigunButtons', function() {
+    return {
+	restrict : 'EA',
+	templateUrl : 'app/public/login-buttons-view.html',
+	controller : 'LoginButtonsController'
+    };
 });

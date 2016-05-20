@@ -57,9 +57,6 @@ This software is an personal experiment and it is free for general use
                         </li>
                     </ul>
                     
-                    
-                    
-                    
                 </div><!--/.nav-collapse -->
               </div>
             </nav><!-- // bootstrap -->
@@ -75,152 +72,8 @@ This software is an personal experiment and it is free for general use
             </div>
         </div>
         
-        <!-- page header -->
-        <div class="page-header">
-            <!-- bootstrap -->
-            <div class="container">
-                <!-- breadcrumb -->
-                <ol class="breadcrumb">
-                    <li><a href="#">My Wallet</a></li>
-                    <li class="active">Transações</li>
-                </ol>
-
-                <!-- page title -->
-                <h2>Minhas transações</h2>
-            </div> <!-- // bootstrap -->
-        </div> <!-- // page-header -->
-        
-        <!-- modular area -->
-        
-        <!-- content -->
-        <div class="content content-transaction">
-            <!-- bootstrap -->
-            <div class="container">
-                <div class="row">
-                    <!-- left-site -->
-                    <div class="col-sm-12">
-                        
-                        <!-- bootstrap panel -->
-                        <div class="panel panel-default">
-                            <!-- Default panel contents -->
-                            <div class="panel-heading">
-                                <span>Transações</span>
-                                <span class="label label-default right">Saldo: R$ -(45,00)</span>
-                            </div>
-                            
-                            <div class="panel-body">
-                                <!-- toolbar -->
-                                <div class="btn-group" role="group" aria-label="Ações">
-                                    <!-- dropdown group -->
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-default btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Nova <span class="caret"></span>
-                                        </button>
-
-                                        <ul class="dropdown-menu">
-                                          <li><a href="#">Nova transação</a></li>
-                                          <li role="separator" class="divider"></li>
-                                          <li><a href="#">Nova carteira</a></li>
-                                          <li><a href="#">Nova lista</a></li>
-                                        </ul>
-                                    </div> <!-- // dorpdown group -->
-
-                                    <button type="button" class="btn btn-default">Editar</button>
-                                    <button type="button" class="btn btn-default btn-danger">Remover</button>
-                                </div>
-
-                                <div class="btn-group" role="group" aria-label="Ações">
-                                    <button type="button" class="btn btn-default">Atualizar</button>
-                                </div>
-                                <!-- // toolbar -->
-                            </div>
-                            
-                            <!-- transaction table -->
-                            <table class="table table-transactions">
-                                
-                                <thead>
-                                    <tr>
-                                        <th class="check">
-                                            <input type="checkbox" title="Selecionar todos" name="check_all" value="1" />
-                                        </th>
-                                        <th class="date">Data</th>
-                                        <th class="ammount">Valor</th>
-                                        <th class="description">Descrição</th>
-                                        <th class="wallet">Carteira</th>
-                                        <th class="actions">Ações</th>
-                                    </tr>
-                                </thead>
-                                
-                                <tbody>
-                                    <tr data-transaction-id="1" class="transaction transaction-credit">
-                                        <td class="check">
-                                            <input type="checkbox" title="Selecionar todos" name="check" />
-                                        </td>
-                                        <td class="date"><span>25/04/2016</span></td>
-                                        <td class="ammount">R$ <span>59,45</span></td>
-                                        <td class="description">Recebimento de Fulano de tal</td>
-                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
-                                        <td class="actions">{{ TODO }}</td>
-                                    </tr>
-                                    <tr data-transaction-id="2" class="transaction transaction-credit">
-                                        <td class="check">
-                                            <input type="checkbox" title="Selecionar todos" name="check" />
-                                        </td>
-                                        <td class="date"><span>25/04/2016</span></td>
-                                        <td class="ammount">R$ <span>59,45</span></td>
-                                        <td class="description">Recebimento de Fulano de tal</td>
-                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
-                                        <td class="actions">{{ TODO }}</td>
-                                    </tr>
-                                    <tr data-transaction-id="3" class="transaction transaction-debit">
-                                        <td class="check">
-                                            <input type="checkbox" title="Selecionar todos" name="check" />
-                                        </td>
-                                        <td class="date"><span>25/04/2016</span></td>
-                                        <td class="ammount">R$ <span>(-59,45)</span></td>
-                                        <td class="description">Recebimento de Fulano de tal</td>
-                                        <td class="wallet"><a href="#wallet">Carteira 1</a></td>
-                                        <td class="actions">{{ TODO }}</td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td class="footer" colspan="6">
-                                            <div class="total total-credit">
-                                                <span>Total de receitas:</span>
-                                                <span class="value">R$ 59,46</span>
-                                            </div>
-                                            <div class="total total-debit">
-                                                <span>Total de despesas:</span>
-                                                <span class="value">R$ (-59,46)</span>
-                                            </div>
-                                            <div class="total total-ammout positive">
-                                                <span>Saldo:</span>
-                                                <span class="value">R$ 0,00</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                                
-                            </table> <!-- // transaction table -->
-                            
-                        </div> <!-- // bootstrap panel -->
-
-                        
-                    </div> <!-- // left-side -->
-
-                    <!-- right-side -->
-                    <div class="col-sm-4 hide">
-                        
-                        <p>//TODO </p>
-                        <p>My Sidebar</p>
-                        
-                    </div> <!-- // right-side -->
-                </div>
-            </div> <!-- // bootstrap -->
-        </div> <!-- // content -->
-        
-        <!-- // modular area -->
+        <!-- angular-content -->
+        <div class="content angular-content" data-ng-view></div>
         
         <!-- footer -->
         <footer class="footer">
@@ -237,25 +90,40 @@ This software is an personal experiment and it is free for general use
         <!-- javascript -->
         <!--<script type="text/javascript" src="app/assets/libs/jquery/jquery-2.2.3/jquery-2.2.3.min.js"></script>-->
         <!--<script type="text/javascript" src="app/assets/libs/bootstrap/bootstrap-3.3.6/bootstrap.js"></script>-->
+        <!-- angular core -->
         <script type="text/javascript" src="app/angular/angular-1.5.5/angular.min.js"></script>
         <script type="text/javascript" src="app/angular/angular-1.5.5/angular-route.js"></script>
         <script type="text/javascript" src="app/angular/angular-1.5.5/angular-cookies.js"></script>
         
-        <script type="text/javascript" src="app/uib/ui-bootstrap-tpls-1.3.2.js"></script>
-        
+        <!-- myWallet.core -->
         <script type="text/javascript" src="app/myWallet.js"></script>
+        
+        <!-- myWallet.packages and services -->
+        <script type="text/javascript" src="app/accounts/accounts.js"></script>
+        <script type="text/javascript" src="app/api/api.js"></script>
+        <script type="text/javascript" src="app/lists/lists.js"></script>
+        <script type="text/javascript" src="app/sessions/sessions.js"></script>
+        <script type="text/javascript" src="app/transactions/transactions.js"></script>
+        <script type="text/javascript" src="app/ui/ui.js"></script>
+        <script type="text/javascript" src="app/uib/ui-bootstrap-tpls-1.3.2.js"></script>
+        <script type="text/javascript" src="app/users/users.js"></script>
+        <script type="text/javascript" src="app/wallets/wallets.js"></script>
+        
+        <!-- myWallet directoves and routes -->
         <script type="text/javascript" src="app/directives.js"></script>
         <script type="text/javascript" src="app/restrict-routes.js"></script>
         
-        <script type="text/javascript" src="app/api/api.js"></script>
+        <!-- myWallet package services -->
         <script type="text/javascript" src="app/ui/messages/messages.js"></script>
         <script type="text/javascript" src="app/ui/modals/modals.js"></script>
-        <script type="text/javascript" src="app/sessions/sessions.js"></script>
-        <script type="text/javascript" src="app/users/users.js"></script>
         
+        <!-- myWallet ontrollers -->
         <script type="text/javascript" src="app/ui/ui-controller.js"></script>
         <script type="text/javascript" src="app/ui/modals/password-modal-controller.js"></script>
         <script type="text/javascript" src="app/ui/modals/auth-modal-controller.js"></script>
+        <script type="text/javascript" src="app/ui/messages/messages-controller.js"></script>
+        
+        <script type="text/javascript" src="app/accounts/account-controller.js"></script>
         <script type="text/javascript" src="app/ui/messages/messages-controller.js"></script>
         
     </body>

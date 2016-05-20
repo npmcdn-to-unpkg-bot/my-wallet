@@ -1,0 +1,16 @@
+<!-- page header -->
+<div class="page-header">
+    <!-- bootstrap -->
+    <div class="container">
+        <!-- breadcrumb -->
+        <ol class="breadcrumb" data-ng-show="{{page.breadcrumb}}">
+            <li data-ng-repeat="node in page.breadcrumb" data-ng-class="{active: !node.url}">
+                <a data-ng-if="node.url" data-ng-href="node.url">{{node.label}}</a>
+                <span data-ng-if="!node.url">{{node.label}}</span>
+            </li>
+        </ol>
+
+        <!-- page title -->
+        <h2>{{page.title}}</h2>
+    </div> <!-- // bootstrap -->
+</div> <!-- // page-header -->

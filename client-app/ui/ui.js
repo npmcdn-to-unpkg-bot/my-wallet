@@ -5,10 +5,15 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-'use strict';
+var app = angular.module( 'myWallet.ui', ['ui.bootstrap', 'myWallet.sessions', 'myWallet.users']);
 
-// Instance angular app
-var app = angular.module('myWallet');
+// UI Directives
+app.directive('pageHeader', function() {
+    return {
+	restrict : 'EA',
+	templateUrl : 'app/ui/templates/page-header.html'
+    };
+});
 
 app.directive('uiMessages', function() {
     return {
@@ -23,13 +28,5 @@ app.directive('navbarTop', function() {
 	restrict : 'EA',
 	templateUrl : 'app/navbar/navbar-top.html',
 	controller : 'NavbarController'
-    };
-});
-
-app.directive('sigunButtons', function() {
-    return {
-	restrict : 'EA',
-	templateUrl : 'app/public/login-buttons-view.html',
-	controller : 'LoginButtonsController'
     };
 });

@@ -1,4 +1,4 @@
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.ui');
 
 app.controller('UiMessageController', [ '$scope', 'UiMessagesService',
 function($scope, ui) {

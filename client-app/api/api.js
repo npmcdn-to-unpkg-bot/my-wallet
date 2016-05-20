@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.api', ['ngCookies', 'myWallet.ui']);
 
 app.service('ApiService', ['$http', '$cookies', '$q', 'UiModalsService', function($http, $cookies, $q, uiModals){
     

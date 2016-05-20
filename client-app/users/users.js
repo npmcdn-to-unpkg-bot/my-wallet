@@ -5,9 +5,9 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.users', ['myWallet.api', 'myWallet.sessions']);
 
-app.service('UsersService', ['ApiService', '$q', 'SessionsService', 'ApiService', function(api, $q, sessions, api){
+app.service('UsersService', ['ApiService', '$q', 'SessionsService', function(api, $q, sessions){
     // TODO
     this.currentUser = null;
     

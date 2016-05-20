@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.sessions', ['ngCookies']);
 
 app.service('SessionsService', ['$cookies', '$q', '$http', function($cookies, $q, $http){
         

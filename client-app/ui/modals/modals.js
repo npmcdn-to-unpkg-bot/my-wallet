@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module( 'myWallet' );
+var app = angular.module( 'myWallet.ui' );
 
 app.service('UiModalsService', ['$q', 'SessionsService', '$uibModal', function($q, sessions, $uibModal){
     

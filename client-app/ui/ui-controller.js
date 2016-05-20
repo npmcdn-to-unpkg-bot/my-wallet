@@ -5,7 +5,7 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.ui');
 
 app.controller('UiController', ['$scope', 'UsersService', 'UiModalsService', 'SessionsService', function($scope, users, uiModals, sessions){
     

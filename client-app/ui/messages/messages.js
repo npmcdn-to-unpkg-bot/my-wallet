@@ -1,4 +1,4 @@
-var app = angular.module('myWallet');
+var app = angular.module('myWallet.ui');
 
 /**
  * The `batchLog` service allows for messages to be queued in memory and flushed

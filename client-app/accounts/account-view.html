@@ -1,0 +1,67 @@
+<!-- page-header -->
+<page-header></page-header>
+
+<!-- content -->
+<div class="content content-transaction" ng-show="loaded">
+    <!-- bootstrap -->
+    <div class="container">
+        <div class="row">
+            <!-- left-site -->
+            <div class="col-sm-12">
+
+                <!-- bootstrap panel -->
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">
+                        <span>{{page.description}}</span>
+                    </div>
+
+                    <div class="panel-body">
+                        <form id="registerForm" class="form account-form" data-ng-submit="save()">
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="register_user_name">Nome completo</label>
+                                </div>
+                                <div class="form-group col-sm-8">
+                                    <div class="input-group input-text">
+                                        <input data-ng-model="data.user_name" type="text" class="form-control" name="user_name" id="register_user_name" data-ng-value="user.user_name">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="register_user_email">Seu email principal</label>
+                                </div>
+                                <div class="form-group col-sm-8">
+                                    <div class="input-group input-email">
+                                        <span class="input-group-addon" id="addon-email">
+                                            <span class="glyphicon glyphicon-envelope"></span>
+                                        </span>
+                                        <input data-ng-model="data.user_email" type="email" class="form-control" name="user_email" id="register_user_email" placeholder="joao@silva.com" aria-describedby="addon-email" data-ng-value="user.user_email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-8 col-sm-offset-4">
+                                    <div class="input-group">
+                                        <button type="submit" class="btn btn-default btn-primary" data-ng-disabled="!saveFormStatus">Salvar</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div> <!-- // bootstrap panel -->
+            
+            </div> <!-- // left-side -->
+            
+            <pre>{{user}}</pre>
+            <pre>{{data}}</pre>
+
+        </div>
+    </div> <!-- // bootstrap -->
+</div> <!-- // content -->
