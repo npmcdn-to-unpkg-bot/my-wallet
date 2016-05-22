@@ -7,11 +7,11 @@
             <div class="col-sm-12">
 
                 <!-- bootstrap panel -->
-                <div class="panel panel-default">
+                <div class="panel panel-default" data-ng-show="grid.is_active">
                     <!-- Default panel contents -->
                     <div class="panel-heading">
                         <span>Transações</span>
-                        <span class="label label-default right">Saldo: R$ -(45,00)</span>
+                        <span class="label label-default right">Saldo: R$ {{summary.summary_total}}</span>
                     </div>
 
                     <div class="panel-body">
@@ -58,34 +58,14 @@
                         </thead>
 
                         <tbody>
-                            <tr data-transaction-id="1" class="transaction transaction-credit">
+                            <tr data-transaction-id="{{transaction.transaction_id}}" class="transaction transaction-credit" data-ng-repeat="transaction in transactions">
                                 <td class="check">
                                     <input type="checkbox" title="Selecionar todos" name="check" />
                                 </td>
-                                <td class="date"><span>25/04/2016</span></td>
-                                <td class="ammount">R$ <span>59,45</span></td>
-                                <td class="description">Recebimento de Fulano de tal</td>
-                                <td class="wallet"><a href="#wallet">Carteira 1</a></td>
-                                <td class="actions">{{ TODO }}</td>
-                            </tr>
-                            <tr data-transaction-id="2" class="transaction transaction-credit">
-                                <td class="check">
-                                    <input type="checkbox" title="Selecionar todos" name="check" />
-                                </td>
-                                <td class="date"><span>25/04/2016</span></td>
-                                <td class="ammount">R$ <span>59,45</span></td>
-                                <td class="description">Recebimento de Fulano de tal</td>
-                                <td class="wallet"><a href="#wallet">Carteira 1</a></td>
-                                <td class="actions">{{ TODO }}</td>
-                            </tr>
-                            <tr data-transaction-id="3" class="transaction transaction-debit">
-                                <td class="check">
-                                    <input type="checkbox" title="Selecionar todos" name="check" />
-                                </td>
-                                <td class="date"><span>25/04/2016</span></td>
-                                <td class="ammount">R$ <span>(-59,45)</span></td>
-                                <td class="description">Recebimento de Fulano de tal</td>
-                                <td class="wallet"><a href="#wallet">Carteira 1</a></td>
+                                <td class="date"><span>{{transaction.transaction_date.date}}/{{transaction.transaction_date.month}}</span></td>
+                                <td class="ammount">R$ <span>{{transaction.transaction_amount}}</span></td>
+                                <td class="description">{{transaction.transaction_description}}</td>
+                                <td class="wallet"><a href="#wallet">{{transaction.wallet_name}}</a></td>
                                 <td class="actions">{{ TODO }}</td>
                             </tr>
                         </tbody>
@@ -94,15 +74,15 @@
                                 <td class="footer" colspan="6">
                                     <div class="total total-credit">
                                         <span>Total de receitas:</span>
-                                        <span class="value">R$ 59,46</span>
+                                        <span class="value">R$ {{summary.credit}}</span>
                                     </div>
                                     <div class="total total-debit">
                                         <span>Total de despesas:</span>
-                                        <span class="value">R$ (-59,46)</span>
+                                        <span class="value">R$ ({{summary.debit}})</span>
                                     </div>
                                     <div class="total total-ammout positive">
                                         <span>Saldo:</span>
-                                        <span class="value">R$ 0,00</span>
+                                        <span class="value">R$ {{summary.total}}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -125,3 +105,6 @@
         </div>
     </div> <!-- // bootstrap -->
 </div> <!-- // content -->
+
+<pre>{{transactions}}</pre>
+<pre>{{summary}}</pre>

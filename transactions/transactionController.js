@@ -183,11 +183,12 @@ function saveTransaction( req, res ){
         if (transactionData.transaction_date){
             transactionData.transaction_date = dateTimeFormater( transactionData.transaction_date );
         }
-        transactionData.transaction_ammount = req.body.transaction_ammount || null;
-        transactionData.transaction_ammount = parseFloat( transactionData.transaction_ammount );
+        transactionData.transaction_amount = req.body.transaction_amount || null;
+        transactionData.transaction_amount = parseFloat( transactionData.transaction_amount );
         transactionData.transaction_description = req.body.transaction_description || null;
         transactionData.wallet_id = req.body.wallet_id || null;
         transactionData.list_id = req.body.list_id || null;
+        transactionData.is_active = req.body.is_active || null;
         
         if (!transactionData.user_id){
             throw new Error('ERROR_TRANSACTIONS_INVALID_USER_PARAM');
@@ -199,13 +200,19 @@ function saveTransaction( req, res ){
                 return;
             }
             
-            //data.wallet.wallet_name = transactionData.wallet_name;
-            data.transaction.user_id = transactionData.user_id;
-            data.transaction.transaction_date = transactionData.transaction_date;
-            data.transaction.transaction_ammount = transactionData.transaction_ammount;
-            data.transaction.transaction_description = transactionData.transaction_description;
-            data.transaction.wallet_id = transactionData.wallet_id;
-            data.transaction.list_id = transactionData.list_id;
+            // data.transaction.user_id = transactionData.user_id;
+            if (transactionData.transaction_date)
+                data.transaction.transaction_date = transactionData.transaction_date;
+            if (transactionData.transaction_amount)
+                data.transaction.transaction_amount = transactionData.transaction_amount;
+            if (transactionData.transaction_description)
+                data.transaction.transaction_description = transactionData.transaction_description;
+            if (transactionData.wallet_id)
+                data.transaction.wallet_id = transactionData.wallet_id;
+            if (transactionData.list_id)
+                data.transaction.list_id = transactionData.list_id;
+            if (transactionData.is_active!==null)
+                data.transaction.is_active = transactionData.is_active;
             
             data.transaction.save(function(err){
                 if (err){
@@ -239,11 +246,12 @@ function insertTransaction( req, res ){
         if (transactionData.transaction_date){
             transactionData.transaction_date = dateTimeFormater( transactionData.transaction_date );
         }
-        transactionData.transaction_ammount = req.body.transaction_ammount || null;
-        transactionData.transaction_ammount = parseFloat( transactionData.transaction_ammount );
+        transactionData.transaction_amount = req.body.transaction_amount || null;
+        transactionData.transaction_amount = parseFloat( transactionData.transaction_amount );
         transactionData.transaction_description = req.body.transaction_description || null;
         transactionData.wallet_id = req.body.wallet_id || null;
         transactionData.list_id = req.body.list_id || null;
+        transactionData.is_active = req.body.is_active || null;
         
         if (!transactionData.user_id){
             throw new Error('ERROR_TRANSACTIONS_INVALID_USER_PARAM');
@@ -253,8 +261,8 @@ function insertTransaction( req, res ){
             throw new Error('ERROR_TRANSACTIONS_INVALID_DATE_PARAM');
         }
         
-        if (!transactionData.transaction_ammount){
-            throw new Error('ERROR_TRANSACTIONS_INVALID_AMMOUNT_PARAM');
+        if (!transactionData.transaction_amount){
+            throw new Error('ERROR_TRANSACTIONS_INVALID_AMOUNT_PARAM');
         }
         
         if (!transactionData.wallet_id){

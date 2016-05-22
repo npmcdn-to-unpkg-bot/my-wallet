@@ -16,7 +16,7 @@ var listModel = require(global.pathTo('/lists/listModel.js'));
  * {
  *     transaction_id: {number},
  *     transaction_date: {Date},
- *     transaction_ammount: {number},
+ *     transaction_amount: {number},
  *     transaction_description: {string},
  *     user_id: {number},
  *     wallet_id: {number},
@@ -30,13 +30,14 @@ var Transaction = function( data ){
         for (var x in data){
             switch(x){
                 case 'transaction_id':
-                case 'transaction_ammount':
+                case 'transaction_amount':
                 case 'transaction_description':
                 case 'user_id':
                 case 'wallet_id':
                 case 'wallet_name':
                 case 'list_id':
                 case 'list_name':
+                case 'is_active':
                     this[x] = data[x];
                     break;
                 case 'transaction_date':
@@ -105,13 +106,13 @@ Transaction.prototype.save = function( next ){
             'Update transactions '+
                 'Set'+
                    ' date = ?,'+
-                   ' ammount = ?,'+
+                   ' amount = ?,'+
                    ' description = ?,'+
                    ' user_id = ?,'+
                    ' wallet_id = ?,';
         var values = [
             this.transaction_date,
-            this.transaction_ammount,
+            this.transaction_amount,
             this.transaction_description,
             this.user_id,
             this.wallet_id
@@ -168,7 +169,7 @@ Transaction.prototype.export = function(){
             minutes: this.transaction_date.getMinutes(),
             seconds: this.transaction_date.getSeconds()
         },
-        transaction_ammount: this.transaction_ammount,
+        transaction_amount: this.transaction_amount,
         transaction_description: this.transaction_description,
         wallet_id: this.wallet_id,
         wallet_name: this.wallet_name,
@@ -204,8 +205,9 @@ var Transactions = function(){};
 Transactions.prototype.find = function( find, next ){
     
     var db = require(global.pathTo('/db/dbModel.js'));
-    var query;
-    var values = [];
+    var commonQuery, resultQuery, summaryQuery;
+    var resultValues = [];
+    var summaryValues = [];
         
     try{
         if (typeof find.userId === 'undefined'){
@@ -248,16 +250,25 @@ Transactions.prototype.find = function( find, next ){
 //        }
         
         // Start tu build query
-        query = 
+        resultQuery = 
             'Select '+
                 't.id as transaction_id, '+
-                't.ammount as transaction_ammount, '+
+                't.amount as transaction_amount, '+
                 't.date as transaction_date, '+
                 't.description as transaction_description, '+
                 'w.id as wallet_id, '+
                 'w.name as wallet_name, '+
                 'l.id as list_id, '+
-                'l.name as list_name '+
+                'l.name as list_name ';
+            
+        // Summary query
+        summaryQuery = 
+            'Select '+
+                'SUM(t.amount) as summary_total, '+
+                'SUM(CASE WHEN t.amount<0 THEN t.amount ELSE 0 END) as summary_credit, '+
+                'SUM(CASE WHEN t.amount>0 THEN t.amount ELSE 0 END) as summary_debit ';
+        
+        commonQuery = 
             'From '+
                 'transactions as t '+
             'Join '+
@@ -266,87 +277,94 @@ Transactions.prototype.find = function( find, next ){
                 'lists as l On t.list_id = l.id '+
             'Where '+
                 'w.user_id = ? ';
-
-        values.push(find.userId);
+        
+        
+        resultValues.push(find.userId);
         
         if (find.search){
             // Find by key
-            query += ' And (';
+            commonQuery += ' And (';
             if (find.fields){
                 for(var x in find.fields){
                     switch(find.fields[x]){
                         case 'transaction_id':
-                            query += ' t.id = ? Or';
-                            values.push(find.search);
+                            commonQuery += ' t.id = ? Or';
+                            resultValues.push(find.search);
                             break;
                         case 'wallet_name':
-                            query += ' w.name Like ? Or';
-                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            commonQuery += ' w.name Like ? Or';
+                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                             
                         case 'list_name':
-                            query += ' l.name Like ? Or';
-                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            commonQuery += ' l.name Like ? Or';
+                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                             
                         case 'transaction_description':
-                            query += ' t.description Like ? Or';
-                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            commonQuery += ' t.description Like ? Or';
+                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                             
                         case 'wallet_name':
-                            query += ' w.name Like ? Or';
-                            values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            commonQuery += ' w.name Like ? Or';
+                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                     }
                 }
             } else {
-                query += ' t.description Like ? Or';
-                query += ' w.name Like ? Or';
-                query += ' l.name Like ? Or';
-                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
-                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
-                values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                commonQuery += ' t.description Like ? Or';
+                commonQuery += ' w.name Like ? Or';
+                commonQuery += ' l.name Like ? Or';
+                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
             }
-            query = query.slice(0, -2);
-            query += ') ';
+            commonQuery = query.slice(0, -2);
+            commonQuery += ') ';
         }
         
         // Lists and Wallets
         if (find.walletId){
-            query += ' And t.wallet_id = ?';
-            values.push(find.walletId);
+            commonQuery += ' And t.wallet_id = ?';
+            resultValues.push(find.walletId);
         }
         
         if (find.listId){
-            query += ' And t.list_id = ?';
-            values.push(find.listId);
+            commonQuery += ' And t.list_id = ?';
+            resultValues.push(find.listId);
         }
 
         // Date range
         if (find.start_date){
-            query += 'And t.date > ? ';
-            values.push(find.start_date);
+            commonQuery += 'And t.date > ? ';
+            resultValues.push(find.start_date);
         }
         
         if (find.end_date){
-            query += 'And t.date < ? ';
-            values.push(find.end_date);
+            commonQuery += 'And t.date < ? ';
+            resultValues.push(find.end_date);
         }
         
+        resultQuery += commonQuery;
+        summaryQuery += commonQuery;
+        summaryQuery += ' And t.is_active = 1 ';
+        summaryValues = resultValues;
+        
         // Sort and order
-        query += ' Order By t.date Asc ';
+        resultQuery += ' Order By t.date Asc ';
     
         // Pagination
-        query += ' Limit ?, ?';
-        values.push((find.page * find.items));
-        values.push(find.items);
+        resultQuery += ' Limit ?, ?';
+        resultValues.push((find.page * find.items));
+        resultValues.push(find.items);
     
         // End query
-        query += ';';
-    
+        resultQuery += ';';
+        summaryQuery += ';';
+        
         // Do the magic
-        db.query( query, values, function(err, data){
+        db.query( resultQuery, resultValues, function(err, data){
             if (err){
                 next(err);
                 return;
@@ -357,7 +375,20 @@ Transactions.prototype.find = function( find, next ){
                 list.push(new Transaction(data[x]));
             }
 
-            next(false, { transactions: list });
+            db.query(summaryQuery, summaryValues, function(err, data){
+                if (err){
+                    next(err);
+                    return;
+                }
+                
+                var pagination = {
+                    page: find.page,
+                    items: find.items
+                }
+                
+                next(false, { transactions: list, summary: data[0], pagination: pagination });
+            });
+
         });
     } catch(err) {
         next(err);
@@ -399,7 +430,7 @@ Transactions.prototype.getTransactionById = function( user_id, transaction_id, n
  * @param {object} data A Transaction Object or an abstract transaction object
  * {
  *     user_id: {number}
- *     transaction_ammount: {string},
+ *     transaction_amount: {string},
  *     transaction_date: (Date),
  *     transaction_description: {string},
  *     wallet_id: {number} @required,
@@ -420,11 +451,11 @@ Transactions.prototype.insertTransaction = function( data, next ){
             'transactions '+
                 '(';
     
-    fieldsQuery = 'user_id, ammount, date, description, wallet_id,';
+    fieldsQuery = 'user_id, amount, date, description, wallet_id,';
     valuesQuery = '?, ?, ?, ?, ?,';
         
     insertValues.push(data.user_id);
-    insertValues.push(data.transaction_ammount);
+    insertValues.push(data.transaction_amount);
     insertValues.push(data.transaction_date);
     insertValues.push(data.transaction_description);
     insertValues.push(data.wallet_id);
@@ -434,6 +465,12 @@ Transactions.prototype.insertTransaction = function( data, next ){
         valuesQuery += ' ?,';
         insertValues.push(data.list_id);
     };
+    
+    if (data.is_active !== null){
+        fieldsQuery += ' is_active,';
+        valuesQuery += ' ?,';
+        insertValues.push(data.is_active);
+    }
     
     // remove extra (,)
     fieldsQuery = fieldsQuery.slice(0, -1);
@@ -461,7 +498,7 @@ Transactions.prototype.insertTransaction = function( data, next ){
  * @param {object} transaction_data Transaction abstract object data
  * {
  *     transaction_id: {number},
- *     transaction_ammount: {number},
+ *     transaction_amount: {number},
  *     transaction_description: {string},
  *     transaction_date: {Date},
  *     wallet_id: {number},
