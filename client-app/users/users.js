@@ -35,9 +35,9 @@ app.service('UsersService', ['ApiService', '$q', 'SessionsService', function(api
                 throw new Error('ERROR_USERS_INVALID_NAME');
             }
             
-            api.post('/users/' + this.currentUser.user_id, userData).then(function(user){
-                _self.currentUser = user;
-                q.resolve(user);
+            api.post('/users/details', userData).then(function(response){
+                _self.currentUser = response.data.user;
+                q.resolve(response.data.user);
             }, function(err){
                 q.reject(err);
             });
@@ -120,5 +120,41 @@ app.service('UsersService', ['ApiService', '$q', 'SessionsService', function(api
         }
         
         return deferred.promise;
+    };
+    
+    this.changePassword = function(userData){
+        var q = $q.defer();
+        
+        try {
+            
+            if (!(userData && userData.user_email && _validate.isEmail(userData.user_email))){
+                throw new Error('ERROR_USERS_INVALID_EMAIL');
+            }
+            
+            if (!(userData && userData.user_current_password)){
+                throw new Error('ERROR_USERS_INVALID_PASSWORD');
+            }
+            
+            if (!(userData && userData.user_new_password)){
+                throw new Error('ERROR_USERS_INVALID_NEW_PASSWORD');
+            }
+            
+            api.post('/users/password/', userData).then(function(response){
+                // success
+                if (response.data.error){
+                    q.reject(new Error(response.data.error.key));
+                } else {
+                    q.resolve(response.data.user);
+                }
+            }, function(err){
+                // error
+                q.reject(err);
+            });
+            
+        } catch(err) {
+            q.reject(err);
+        }
+        
+        return q.promise;
     };
 }]);

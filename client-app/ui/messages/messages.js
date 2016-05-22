@@ -60,6 +60,10 @@ app.service('UiMessagesService', [ '$timeout', function($timeout) {
     this.error = function(err){
         this.add(err.message, 'danger');
     };
+    
+    this.success = function(message){
+        this.add(message, 'success');
+    };
 
     this.remove = function(index) {
 	this.messages.splice(index, 1);

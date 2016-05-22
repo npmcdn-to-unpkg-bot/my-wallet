@@ -34,7 +34,9 @@ app.controller('UiController', ['$scope', 'UsersService', 'UiModalsService', 'Se
     };
     
     $scope.openPasswordModal = function(){
-        uiModals.passwordModal( $scope.user );
+        uiModals.passwordModal( $scope.user ).then(
+        
+        );
     };
     
     // Loading Dependences

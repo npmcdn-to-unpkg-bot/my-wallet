@@ -78,6 +78,7 @@ module.exports = {
     ERROR_USERS_INVALID_NAME: { message: 'Nome inválido!', code: statusEnum.BAD_REQUEST },
     ERROR_USERS_INVALID_EMAIL: { message: 'Email inválido!', code: statusEnum.BAD_REQUEST },
     ERROR_USERS_INVALID_PASSWORD: { message: 'Senha inválida!', code: statusEnum.BAD_REQUEST },
+    ERROR_USERS_WRONG_USER_OR_PASSWORD: { message: 'Email ou senha incorretos!', code: statusEnum.BAD_REQUEST },
     
     ERROR_USERS_FAILURE_ON_REMOVE_TRANSACTIONS: { message: 'Falha ao remover as transações do usuário', code: statusEnum.ERROR },
     ERROR_USERS_FAILURE_ON_REMOVE_WALLETS: { message: 'Falha ao remover as carteiras do usuário', code: statusEnum.ERROR },

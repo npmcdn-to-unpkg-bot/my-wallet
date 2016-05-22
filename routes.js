@@ -78,6 +78,7 @@ function routeSetup(app, express){
      * Users
      */
     app.post('/api/v1/users/', userControler.insert); // New User
+    app.post('/api/v1/users/password/', userControler.changePassword); // Change Password
     app.get('/api/v1/users/details/', userControler.get); // Single User
     app.post('/api/v1/users/details/', userControler.save); // Update single User
     app.post('/api/v1/users/delete/', userControler.delete); // Delete User

@@ -29,6 +29,7 @@ app.controller('AccountController', ['$scope', 'ApiService', 'UsersService', 'Ui
     $scope.saveFormStatus = true;
     $scope.saveUser = function(){
         $scope.saveFormStatus = false;
+        ui.clear();
         users.save( $scope.user ).then(function(user){
             $scope.saveFormStatus = true;
             $scope.user = user;

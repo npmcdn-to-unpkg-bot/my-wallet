@@ -30,11 +30,11 @@ function getUserDetails(req, res){
             throw new Error('ERROR_INVALID_USER_ID');
         }
         
-        userModel.getUserById( req.currentUser.user_id, function(err, user){
+        userModel.getUserById( req.currentUser.user_id, function(err, data){
             if (err){
                 json.buildError(err);
             } else {
-                json.build( { user: user.export() } );
+                json.build( { user: data.user.export() } );
             }
         });
         
@@ -81,6 +81,51 @@ function saveUserData(req, res){
         json.buildError(err);
     }  
 }
+
+function changePassword(req, res){
+    var json = bodyBuilder.getBuilder(res);
+    
+    var _changeUserPassword = function(user, password){
+        user.changePass(password, function(err){
+            if (err){
+                json.buildError(err);
+            } else {
+                json.build( { user: user.export() } );
+            }
+        });
+    };
+    
+    try {
+        
+        var userData = {};
+        userData.user_current_password = (req.body.user_current_password)? req.body.user_current_password : null;
+        userData.user_email = (req.body.user_email) ? req.body.user_email : null;
+        userData.user_new_password = (req.body.user_new_password)? req.body.user_new_password : null;
+        
+        if (!userData.user_new_password) {
+            throw new Error('ERROR_USERS_INVALID_PASSWORD');
+        }
+        
+        userModel.find({
+            search: userData.user_email,
+            fields: ['user_email'],
+            password: userData.user_current_password
+        }, function(err, data){
+            if (err){
+                json.buildError(err);
+            } else {
+                if (data.users.length == 1){
+                    _changeUserPassword(data.users[0], userData.user_new_password);
+                } else {
+                    json.buildError(new Error('ERROR_USERS_WRONG_USER_OR_PASSWORD'));
+                }
+            }
+        });
+        
+    } catch (err) {
+        json.buildError(err);
+    }
+};
 
 function insertUser(req, res){
     var json = bodyBuilder.getBuilder(res);
@@ -146,5 +191,6 @@ module.exports = {
     get: getUserDetails,
     save: saveUserData,
     insert: insertUser,
-    delete: deleteUser
+    delete: deleteUser,
+    changePassword: changePassword
 };

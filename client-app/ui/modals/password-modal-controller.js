@@ -7,31 +7,41 @@
 
 var app = angular.module('myWallet.ui');
 
-app.controller('UiPasswordModalController', [ '$scope', '$uibModalInstance', 'SessionsService', 'user', function($scope, $uibModalInstance, sessions, user){
+app.controller('UiPasswordModalController', [ '$scope', '$uibModalInstance', 'UsersService', 'user', function($scope, modal, users, user){
     
     $scope.page = {};
-    $scope.page.title = 'Sessão expirada!';
-    $scope.page.description = 'Informe novamente sua senha';
+    $scope.page.title = 'Alterar sua senha!';
+    $scope.page.description = 'Informe primeiro sua senha atual, e então a nova senha.';
     
     $scope.formStatus = true;
+    $scope.formPasswordField = 'password';
     
     $scope.data = {
         user_email: user.user_email,
-        password: null
+        user_current_password: null,
+        user_new_password: null
     };
     
-    $scope.doLogin = function(){
+    $scope.changePasswordField = function(){
+        if ($scope.formPasswordField === 'password'){
+            $scope.formPasswordField = 'text';
+        } else {
+            $scope.formPasswordField = 'password';
+        }
+    };
+    
+    $scope.doChangePassword = function(){
         $scope.formStatus = false;
         
-        var promise = sessions.auth( $scope.data );
-        promise.then(function( data ){
+        users.changePassword( $scope.data ).then(function(user){
             // success
+            alert('USERS_PASSWORD_CHANGED');
+            modal.close(user);
             $scope.formStatus = true;
-            $uibModalInstance.close(data.user);
-        }, function( err ){
+        }, function(err){
             // error
-            $scope.formStatus = true;
             alert(err.message);
+            $scope.formStatus = true;
         });
         
     };

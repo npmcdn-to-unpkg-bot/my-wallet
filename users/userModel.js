@@ -5,6 +5,8 @@
  * @author: Max Andriani <max.andriani@gmail.com>
  */
 
+var sha1 = require('crypto-js/hmac-sha1');
+
 /**
  * User Standard Object
  * It is the user. This object should storage the user's basic data and do some single commands
@@ -208,14 +210,13 @@ User.prototype.save = function( next ){
 User.prototype.changePass = function( passwd, next ){
     try {
         var db = require(global.pathTo('/db/dbModel.js'));
-        var sha1 = require('crypto-js/hmac-sha1');
         var passwd_hash;
         
-        passwd_hash = sha1.encrypt(passwd, global.config.SESSION_SECRET);
+        passwd_hash = sha1(passwd, global.config.SESSION_SECRET).toString();
         
-        var query = 'Update users Set password=\'?\' Limit 1;';
+        var query = 'Update users Set password=? Where users.id = ? Limit 1;';
         
-        db.query( query, [passwd_hash], function(err){
+        db.query( query, [passwd_hash, this.user_id], function(err){
             if (err){
                 next(new Error('ERROR_USERS_FAILURE_ON_CHANGE_PASSWORD'));
                 return;
@@ -397,26 +398,27 @@ Users.prototype.find = function( find, next ){
             'From '+
                 'users as u '+
             'Inner Join '+
-                'auth as a On a.user_id = u.id And a.is_primary = 1 ';
+                'auth as a On a.user_id = u.id And a.is_primary = 1 '+
+            'Where 1=1 ';
     
     if (find.search){
-        query += 'Where 1=1';
+        query += ' And (';
         
         if (find.fields.length > 0){
             for( var x in find.fields){
                 // Find by key
                 switch(find.fields[x]){
-                    case 'email':
-                        query += " And a.email = ?";
+                    case 'user_email':
+                        query += " a.email = ? Or";
                         values.push(find.search);
                         break;
-                    case 'name':
+                    case 'user_name':
                         var keyString = find.search.replace(/\s/g, '%');
-                        query += ' And u.name = ?';
+                        query += ' u.name = ? Or';
                         values.push(keyString);
                         break;
                     case 'user_id':
-                        query += ' And u.id = ?';
+                        query += ' u.id = ? Or';
                         values.push(find.search);
                         break;
                 }
@@ -425,11 +427,20 @@ Users.prototype.find = function( find, next ){
             // Find by key
             var nameString = find.search.replace(/\s/g, '%');
             var emailString = find.search;
-            query += " And u.name Like '%?%'";
+            query += " u.name Like %?% Or";
             values.push(nameString);
-            query += " And a.email = '?'";
+            query += " a.email = ? Or";
             values.push(emailString);
         }
+        
+        query = query.slice(0, -2);
+        query += ') ';
+    }
+    
+    // Password
+    if (find.password){
+        query += ' And u.password = ? ';
+        values.push(sha1(find.password, global.config.SESSION_SECRET).toString());
     }
     
     // Sort and order
@@ -459,6 +470,94 @@ Users.prototype.find = function( find, next ){
 };
 
 /**
+ * Users.findAccount()
+ * Search in the database for a single user account, then factory an User object to him
+ * 
+ * @param {object} find The search param object
+ * {
+ *      user_email: {string}, The user email
+ *      auth_token: (string), The auth token,
+ *      auth_key: (string), The auth key
+ *      auth_type: (optional|number) The auth type Wallet|Google|Facebook
+ *      password: {string}, The User's open pass frase
+ * }
+ * @param {function} next A callback function
+ * @returns {undefined}
+ */
+Users.prototype.findAccount = function( find, next ){
+    
+    var db = require(global.pathTo('/db/dbModel.js'));
+    var query;
+    var values = [];
+    var _self = this;
+    
+    // Start to build query
+    query = 'Select '+
+                'a.user_id as user_id '+
+            'From '+
+                'auth as a ';
+    
+    if (find.password){
+        query += 'Inner Join users as u On a.user_id = u.id ';
+    }
+    
+    query += 'Where 1=1 ';
+    
+    if (find.user_email){
+        query += 'And a.email = ? ';
+        values.push(find.user_email);
+    }
+    
+    if (find.auth_token){
+        query += 'And a.auth_token = ? ';
+        values.push(find.auth_token);
+    }
+    
+    if (find.auth_key){
+        query += 'And a.auth_key = ? ';
+        values.push(find.auth_key);
+    }
+    
+    if (find.auth_type){
+        query += 'And a.auth_type_id = ? ';
+        values.push(find.auth_type);
+    }
+    
+    // Password
+    if (find.password){
+        query += ' And u.password = ? ';
+        values.push(sha1(find.password, global.config.SESSION_SECRET).toString());
+    }
+    
+    // End query
+    query += ';';
+    
+    // Do the magic
+    db.query( query, values, function(err, data, fields){
+        if (err){
+            next(new Error('ERROR_USERS_FAILURE_ON_SEARCH_USER'));
+            return;
+        }
+        
+        if (data.length === 1){
+            
+            // User found, now, get user's info
+            _self.getUserById( data[0].user_id, function(err, data){
+                if (err){
+                    next(err);
+                } else {
+                    next(false, data);
+                }
+            });
+            
+        } else {
+            next(new Error('ERROR_USERS_FAILURE_ON_SEARCH_USER'));
+        }
+        
+    });
+};
+
+/**
  * Users.getUserById()
  * Get user's info from database and factory an User Object
  * 
@@ -474,7 +573,7 @@ Users.prototype.getUserById = function( user_id, next ){
         if (err){
             next(err);
         } else {
-            next(false, data.users[0]);
+            next(false, { user: data.users[0] });
         }
     });
 };

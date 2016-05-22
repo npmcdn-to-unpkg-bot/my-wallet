@@ -22,10 +22,9 @@ var Session = function( request ){
 Session.prototype.auth = function(email, pass, next){
     var _self = this;
     
-    userModel.find({
-            search: email,
-            fields: ['email'],
-            password: sha1(pass, global.config.SESSION_SECRET).toString()
+    userModel.findAccount({
+            user_email: email,
+            password: pass
         },
         function(err, data){
             if (err){
@@ -33,7 +32,7 @@ Session.prototype.auth = function(email, pass, next){
                 return;
             }
             
-            _self.user = data.users[0];
+            _self.user = data.user;
             var auth = _self.generateToken(_self.user);
             
             _self.req.session = {

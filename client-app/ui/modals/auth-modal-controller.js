@@ -7,7 +7,7 @@
 
 var app = angular.module('myWallet.ui');
 
-app.controller('UiPasswordModalController', [ '$scope', '$uibModalInstance', 'SessionsService', 'user', function($scope, $uibModalInstance, sessions, user){
+app.controller('UiAuthModalController', [ '$scope', '$uibModalInstance', 'SessionsService', 'user', function($scope, $uibModalInstance, sessions, user){
     
     $scope.page = {};
     $scope.page.title = 'Sessão expirada!';

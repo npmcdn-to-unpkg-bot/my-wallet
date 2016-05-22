@@ -77,7 +77,7 @@ app.service('ApiService', ['$http', '$cookies', '$q', 'UiModalsService', functio
             // do Http
             var httpReq = {
                 url: '/api/v1' + uri,
-                mathod: method,
+                method: method,
                 data: data,
                 headers: { 'x-access-token': currentSession }
             };

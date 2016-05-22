@@ -26,24 +26,6 @@ app.service('UiModalsService', ['$q', 'SessionsService', '$uibModal', function($
     };
     
     // Quick alias
-    this.authModal = function(){
-        return this.addModal({
-            title: 'Sessão expirada',
-            message: 'Por favor, informe novamente suas credenciais',
-            template: '/app/ui/modals/auth-modal-form-view.html',
-            $scope: {
-                onSubmit: function( promise, data ){
-                    sessions.auth(data).then(function(response){
-                        // success
-                        promise.resolve(response.data);
-                    }, function(response){
-                        // error
-                        promise.reject(response);
-                    });
-                }
-            }
-        });
-    };
     
     this.chioseModal = function( title, message, yesLabel, noLabel ){
         return this.addModal({
@@ -83,8 +65,32 @@ app.service('UiModalsService', ['$q', 'SessionsService', '$uibModal', function($
         try{
             $uibModal.open({
                 controller: 'UiPasswordModalController',
-                controllerAs: 'modal',
                 templateUrl: '/app/ui/modals/password-modal-form-view.html',
+                resolve: {
+                    user: function(){ return user; }
+                }
+            }).result.then(function(user){
+                q.resolve(user);
+            }, function(err){
+                // error
+                q.reject(err);
+            });
+            
+        } catch (err) {
+            console.log(err.message);
+            q.reject(err);
+        }
+        
+        return q.promise;
+    };
+    
+    this.authModal = function( user ){
+        var q = $q.defer();
+        
+        try{
+            $uibModal.open({
+                controller: 'UiAuthModalController',
+                templateUrl: '/app/ui/modals/auth-modal-form-view.html',
                 resolve: {
                     user: function(){ return user; }
                 }
@@ -101,7 +107,7 @@ app.service('UiModalsService', ['$q', 'SessionsService', '$uibModal', function($
             q.reject(err);
         }
         
-        return q;
+        return q.promise;
     };
     
 }]);
