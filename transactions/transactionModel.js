@@ -205,10 +205,39 @@ var Transactions = function(){};
 Transactions.prototype.find = function( find, next ){
     
     var db = require(global.pathTo('/db/dbModel.js'));
-    var commonQuery, resultQuery, summaryQuery;
-    var resultValues = [];
-    var summaryValues = [];
-        
+    var query = {
+        select: '',
+        from: '',
+        join: '',
+        where: '',
+        flags: {},
+        values: []
+    };
+    
+    // From
+    query.from += 
+        'From '+
+            'transactions as t ';
+    
+    var _checkWallets = function( query ){
+        if (!query.flags.walletJoin){
+            query.join += 
+                'Join '+
+                    'wallets as w On t.wallet_id = w.id ';
+            query.flags.walletJoin = true;
+        }
+    };
+    
+    var _checkLists = function( query ){
+        if (!query.flags.listJoin){
+            query.join += 
+                'Join '+
+                    'lists as l On t.list_id = l.id ';
+            query.flags.listJoin = true;
+        }
+    };
+    
+    // Build the query    
     try{
         if (typeof find.userId === 'undefined'){
             throw new Error('ERROR_TRANSACTIONS_INVALID_USER_PARAM');
@@ -236,158 +265,159 @@ Transactions.prototype.find = function( find, next ){
             find.items = 9;
         }
         
-//        if (!find.start_date){
-//            find.start_date = new Date();
-//            if (find.start_date.getMonth() == 0){
-//                find.start_date.setMonth(11);
-//            } else {
-//                find.start_date.setMonth( find.start_date.getMonth()-1 );
-//            }
-//        }
-//        
-//        if (!find.endDate){
-//            find.endDate = new Date();
-//        }
-        
-        // Start tu build query
-        resultQuery = 
-            'Select '+
-                't.id as transaction_id, '+
-                't.amount as transaction_amount, '+
-                't.date as transaction_date, '+
-                't.description as transaction_description, '+
-                'w.id as wallet_id, '+
-                'w.name as wallet_name, '+
-                'l.id as list_id, '+
-                'l.name as list_name ';
-            
-        // Summary query
-        summaryQuery = 
-            'Select '+
-                'SUM(t.amount) as summary_total, '+
-                'SUM(CASE WHEN t.amount<0 THEN t.amount ELSE 0 END) as summary_credit, '+
-                'SUM(CASE WHEN t.amount>0 THEN t.amount ELSE 0 END) as summary_debit ';
-        
-        commonQuery = 
-            'From '+
-                'transactions as t '+
-            'Join '+
-                'wallets as w On t.wallet_id = w.id '+
-            'Join '+
-                'lists as l On t.list_id = l.id '+
+        // Start to build query
+        // Where wildcard
+        query.where += 
             'Where '+
                 'w.user_id = ? ';
+        query.values.push(find.userId);
         
-        
-        resultValues.push(find.userId);
-        
+        // if there is an search
         if (find.search){
             // Find by key
-            commonQuery += ' And (';
+            query.where += ' And (';
             if (find.fields){
                 for(var x in find.fields){
                     switch(find.fields[x]){
                         case 'transaction_id':
-                            commonQuery += ' t.id = ? Or';
-                            resultValues.push(find.search);
+                            query.where += ' t.id = ? Or';
+                            query.values.push(find.search);
                             break;
                         case 'wallet_name':
-                            commonQuery += ' w.name Like ? Or';
-                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            query.where += ' w.name Like ? Or';
+                            query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            _checkWallets( query );
                             break;
                             
                         case 'list_name':
-                            commonQuery += ' l.name Like ? Or';
-                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            query.where += ' l.name Like ? Or';
+                            query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            _checkLists( query );
                             break;
                             
                         case 'transaction_description':
-                            commonQuery += ' t.description Like ? Or';
-                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            query.where += ' t.description Like ? Or';
+                            query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
                             break;
                             
                         case 'wallet_name':
-                            commonQuery += ' w.name Like ? Or';
-                            resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            query.where += ' w.name Like ? Or';
+                            query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                            _checkWallets( query );
                             break;
                     }
                 }
             } else {
-                commonQuery += ' t.description Like ? Or';
-                commonQuery += ' w.name Like ? Or';
-                commonQuery += ' l.name Like ? Or';
-                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
-                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
-                resultValues.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                query.where += ' t.description Like ? Or';
+                query.where += ' w.name Like ? Or';
+                query.qhere += ' l.name Like ? Or';
+                query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                query.values.push( '%'+find.search.replace(/\s/g, '%')+'%' );
+                _checkWallets(query);
+                _checkLists(query);
             }
-            commonQuery = query.slice(0, -2);
-            commonQuery += ') ';
+            query.where = query.where.slice(0, -2);
+            query.where += ') ';
         }
         
         // Lists and Wallets
         if (find.walletId){
-            commonQuery += ' And t.wallet_id = ?';
-            resultValues.push(find.walletId);
+            query.where += ' And t.wallet_id = ?';
+            query.values.push(find.walletId);
         }
         
         if (find.listId){
-            commonQuery += ' And t.list_id = ?';
-            resultValues.push(find.listId);
+            query.where += ' And t.list_id = ?';
+            query.values.push(find.listId);
         }
-
+        
         // Date range
         if (find.start_date){
-            commonQuery += 'And t.date > ? ';
-            resultValues.push(find.start_date);
+            query.where += 'And t.date > ? ';
+            query.values.push(find.start_date);
         }
-        
+
         if (find.end_date){
-            commonQuery += 'And t.date < ? ';
-            resultValues.push(find.end_date);
+            query.where += 'And t.date < ? ';
+            query.values.push(find.end_date);
         }
         
-        resultQuery += commonQuery;
-        summaryQuery += commonQuery;
-        summaryQuery += ' And t.is_active = 1 ';
-        summaryValues = resultValues;
+        /**
+         * Query selector
+         * 
+         * First check wich query do you want
+         */
+        if (find.isSummary){
+            // SUM transactions values
+            query.where += ' And t.is_active = 1 ';
+            // Select summary
+            query.seelct = 
+                'Select '+
+                    'SUM(t.amount) as summary_total, '+
+                    'SUM(CASE WHEN t.amount<0 THEN t.amount ELSE 0 END) as summary_credit, '+
+                    'SUM(CASE WHEN t.amount>0 THEN t.amount ELSE 0 END) as summary_debit ';
+            
+        } else if (find.isPagination){
+            // Get the pagination info
+            query.select = 
+                'Select '+
+                    'COUNT(t.id) as total_records ';
+        } else {
+            // By defeult, get an paginaed transaction list only
+            query.select =
+                'Select '+
+                    't.id as transaction_id, '+
+                    't.amount as transaction_amount, '+
+                    't.date as transaction_date, '+
+                    't.description as transaction_description, '+
+                    'w.id as wallet_id, '+
+                    'w.name as wallet_name, '+
+                    'l.id as list_id, '+
+                    'l.name as list_name ';
+            _checkWallets( query );
+            _checkLists( query );
+            
+            // Sort and order
+            query.where += ' Order By t.date Asc ';
+    
+            // Pagination
+            query.where += ' Limit ?, ?';
+            query.values.push((find.page * find.items));
+            query.values.push(find.items);
+        }
         
-        // Sort and order
-        resultQuery += ' Order By t.date Asc ';
-    
-        // Pagination
-        resultQuery += ' Limit ?, ?';
-        resultValues.push((find.page * find.items));
-        resultValues.push(find.items);
-    
-        // End query
-        resultQuery += ';';
-        summaryQuery += ';';
+        // Build the final query
+        var finalQuery = '';
+        finalQuery += query.select;
+        finalQuery += query.from;
+        finalQuery += query.join;
+        finalQuery += query.where;
+        finalQuery += ';';
         
         // Do the magic
-        db.query( resultQuery, resultValues, function(err, data){
+        db.query( finalQuery, query.values, function(err, data, fields){
             if (err){
                 next(err);
                 return;
             }
-
-            var list = [];
-            for(var x in data){
-                list.push(new Transaction(data[x]));
+            
+            console.log(fields);
+            
+            var response = {};
+            
+            if (find.isPagination){
+                response.pagination = data[0];
+            } else if (find.isSummary){
+                response.summary = data[0];
+            } else {
+                response.transactions = [];
+                for(var x in data){
+                    response.transactions.push(new Transaction(data[x]));
+                }
             }
 
-            db.query(summaryQuery, summaryValues, function(err, data){
-                if (err){
-                    next(err);
-                    return;
-                }
-                
-                var pagination = {
-                    page: find.page,
-                    items: find.items
-                }
-                
-                next(false, { transactions: list, summary: data[0], pagination: pagination });
-            });
+            next(false, response);
 
         });
     } catch(err) {
