@@ -231,7 +231,7 @@ Transactions.prototype.find = function( find, next ){
     var _checkLists = function( query ){
         if (!query.flags.listJoin){
             query.join += 
-                'Join '+
+                'Left Join '+
                     'lists as l On t.list_id = l.id ';
             query.flags.listJoin = true;
         }
@@ -271,6 +271,7 @@ Transactions.prototype.find = function( find, next ){
             'Where '+
                 'w.user_id = ? ';
         query.values.push(find.userId);
+        _checkWallets( query );
         
         // if there is an search
         if (find.search){
@@ -352,7 +353,7 @@ Transactions.prototype.find = function( find, next ){
             // SUM transactions values
             query.where += ' And t.is_active = 1 ';
             // Select summary
-            query.seelct = 
+            query.select = 
                 'Select '+
                     'SUM(t.amount) as summary_total, '+
                     'SUM(CASE WHEN t.amount<0 THEN t.amount ELSE 0 END) as summary_credit, '+
@@ -401,8 +402,6 @@ Transactions.prototype.find = function( find, next ){
                 next(err);
                 return;
             }
-            
-            console.log(fields);
             
             var response = {};
             

@@ -46,19 +46,69 @@ function findTransactions( req, res ){
     // Response controller
     var json = jsonBuilder.getBuilder(res);
     
+    var _getTransactions = function(search){
+        transactionModel.find( search, function( err, data ){
+            if (err){
+                json.buildError(err);
+            } else {
+                for(var x in data.transactions){
+                    data.transactions[x] = data.transactions[x].export();
+                }
+                response.transactions = data.transactions;
+                
+                _getTransactionsPagination( search );
+            }
+        });
+        
+    };
+    
+    var _getSummary = function(search){
+        transactionModel.find( search, function( err, data ){
+            if (err){
+                json.buildError(err);
+            } else {
+               
+                response.summary = data.summary;
+                json.build(response);
+            }
+        });
+        
+    };
+    
+    var _getTransactionsPagination = function(search){
+        search.isPagination = true;
+        transactionModel.find( search, function( err, data ){
+            if (err){
+                json.buildError(err);
+            } else {
+                
+                data.pagination.page_records = search.items;
+                response.pagination = data.pagination;
+                
+                json.build(response);
+            }
+        });
+    };
+    
     // Validations
     try{
     
         var search = {};
+        var response = {
+            transactions: null,
+            pagination: null,
+            summary: null
+        };
         
         search.search = req.query._search || null;
-        search.page = req.query._page || 0;
+        search.page = parseInt(req.query._page) || 0;
         search.items = req.query._items_per_page || 9;
         search.sort = req.query._sort || null;
         search.startDate = req.query._start_date || null;
         search.endDate = req.query._end_date || null;
         search.transactionId = req.query._transaction || null;
         search.listId = req.query._list || null;
+        search.parse = req.query._parse || null;
         
         // validations
         if (!req.currentUser){
@@ -112,16 +162,19 @@ function findTransactions( req, res ){
             search.endDate = dateFormater(search.endDate);
         }
         
-        transactionModel.find( search, function( err, data ){
-            if (err){
-                json.buildError(err);
-            } else {
-                for(var x in data.transactions){
-                    data.transactions[x] = data.transactions[x].export();
-                }
-                json.build(data);
+        if (search.parse){
+            if (search.parse == 'summary'){
+                search.isSummary = true;
+            } else if ((search.parse == 'pagination')){
+                search.isPagination = true;
             }
-        });
+        }
+        
+        if (search.isSummary){
+            _getSummary( search );
+        } else {
+            _getTransactions( search );
+        }
         
     } catch (err){
         json.buildError(err);
