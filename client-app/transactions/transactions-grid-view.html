@@ -24,19 +24,19 @@
                                 </button>
 
                                 <ul class="dropdown-menu">
-                                  <li><a href="#">Nova transação</a></li>
+                                  <li><a data-ng-click="action.addTransaction()">Nova transação</a></li>
                                   <li role="separator" class="divider"></li>
-                                  <li><a href="#">Nova carteira</a></li>
-                                  <li><a href="#">Nova lista</a></li>
+                                  <li><a data-ng-click="action.addWallet()">Nova carteira</a></li>
+                                  <li><a data-ng-click="action.addList()">Nova lista</a></li>
                                 </ul>
                             </div> <!-- // dorpdown group -->
 
-                            <button type="button" class="btn btn-default">Editar</button>
-                            <button type="button" class="btn btn-default btn-danger">Remover</button>
+                            <button type="button" data-ng-click="action.editTransaction()" class="btn btn-default">Editar</button>
+                            <button type="button" data-ng-click="action.removeTransaction()" class="btn btn-default btn-danger">Remover</button>
                         </div>
 
                         <div class="btn-group" role="group" aria-label="Ações">
-                            <button type="button" class="btn btn-default">Atualizar</button>
+                            <button type="button" data-ng-click="action.refresh()" class="btn btn-default">Atualizar</button>
                         </div>
                         <!-- // toolbar -->
                     </div>
@@ -60,7 +60,7 @@
                         <tbody>
                             <tr data-transaction-id="{{transaction.transaction_id}}" class="transaction transaction-credit" data-ng-repeat="transaction in transactions">
                                 <td class="check">
-                                    <input type="checkbox" title="Selecionar todos" name="check" />
+                                    <input type="checkbox" title="Selecionar todos" name="check" data-ng-model="grid.selection[transaction.transaction_id]" />
                                 </td>
                                 <td class="date"><span>{{transaction.transaction_date.date}}/{{transaction.transaction_date.month}}</span></td>
                                 <td class="ammount">R$ <span>{{transaction.transaction_amount}}</span></td>
@@ -70,6 +70,17 @@
                             </tr>
                         </tbody>
                         <tfoot>
+                            <tr>
+                                <td colspan="6">
+                                    <ul class="pagination">
+                                        <li><a href="#">Página anterior</a></li>
+                                        
+                                        <li data-ng-repeat="page in pagination.getPages()"><a data-ng-click="grid.goToPage( page.index )" data-ng-class="{active: (page.index == pagination.page)}">{{page.label}}</a></li>
+                                        
+                                        <li><a href="#">Próxima página</a></li>
+                                    </ul>
+                                </td>
+                            </tr>
                             <tr>
                                 <td class="footer" colspan="6">
                                     <div class="total total-credit">

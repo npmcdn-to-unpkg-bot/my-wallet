@@ -26,7 +26,19 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     $scope.pagination = {
         page: 0,
         items: 0,
-        items_per_page: 1
+        items_per_page: 1,
+        getPages: function(){
+            var pages = [];
+            
+            for(var x=0; x<(this.items/this.items_per_page); x++){
+                pages.push({
+                    index: x,
+                    label: (x+1)
+                });
+            }
+            
+            return pages;
+        }
     };
     
     $scope.filters = {};
@@ -62,10 +74,21 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     
     // Grid actions
     $scope.grid = {};
-    $scope.grid.nextPage = function(){};
-    $scope.grid.previousPage = function(){};
     $scope.grid.is_active = false;
-    $scope.grid.selection = [];
+    $scope.grid.selection = {};
+    $scope.grid.getSelected = function(){
+        var selected = [];
+        for( var x in $scope.grid.selection){
+            if ($scope.grid.selection[x]){
+                selected.push(x);
+            }
+        }
+        return selected;
+    };
+    $scope.grid.isSelected = function( index ){
+        var list = $scope.grid.getSelected();
+        return (list.indexOf( index ) > -1);
+    };
     
     // Load Summary
     $scope.grid.updateSummary = function(){
@@ -96,14 +119,22 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
             $scope.grid.updateTransactions();
         }
     };
-    $scope.grid.refresh = function(){
+    
+    $scope.grid.goToPage = function(index){
+        $scope.pagination.page = index;
+        $scope.grid.updateTransactions();
+    };
+    
+    $scope.actionbar = {};
+    $scope.action.refresh = function(){
         $scope.grid.updateTransactions();
         $scope.grid.updateSummary();
     };
-    
-    $scope.grid.addTransaction = function( transactionData ){};
-    $scope.grid.openTransaction = function( transactionId ){};
-    $scope.grid.removeTransaction = function( transactionId ){};
+    $scope.actionbar.addTransaction = function(){};
+    $scope.actionbar.addWallet = function(){};
+    $scope.actionbar.addList = function(){};
+    $scope.actionbar.openTransaction = function( transactionId ){};
+    $scope.actionbar.removeTransaction = function( transactionId ){};
     
     // start grid
     $scope.grid.refresh();
