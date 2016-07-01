@@ -46,6 +46,7 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     // private methods
     var _parseError = function(err){
         ui.error(err);
+        $scope.actionbar.btnRefresh = true;
     };
     
     var _parseTransactions = function(response){
@@ -56,6 +57,9 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
             $scope.pagination.items_per_page = response.data.pagination.page_records;
             
             $scope.grid.is_active = true;
+            $scope.actionbar.btnRefresh = true;
+            
+            ui.success('TRANSACTIONS_UPDATE_SUCCESS');
             
         } catch (err) {
             ui.error(err);
@@ -101,19 +105,21 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
         $scope.filters._page = $scope.pagination.page;
         
         // Disable grid
-        $scope.grid.is_active = true;
+        $scope.grid.is_active = false;
         // Call api
         transactions.getTransactions($scope.filters).then(_parseTransactions, _parseError);
     };
     
     // Shortcuts
     $scope.grid.nextPage = function(){
-        if (($scope.pagination.items / $scope.pagination.items_per_page) <= $scope.pagination.page){
+        ui.clear();
+        if (($scope.pagination.items / $scope.pagination.items_per_page) >= $scope.pagination.page){
             $scope.pagination.page++;
             $scope.grid.updateTransactions();
         }
     };
     $scope.grid.previousPage = function(){
+        ui.clear();
         if ($scope.pagination.page > 0){
             $scope.pagination.page--;
             $scope.grid.updateTransactions();
@@ -121,12 +127,22 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     };
     
     $scope.grid.goToPage = function(index){
+        ui.clear();
         $scope.pagination.page = index;
         $scope.grid.updateTransactions();
     };
     
-    $scope.actionbar = {};
-    $scope.action.refresh = function(){
+    $scope.actionbar = {
+        btnNewTransaction: true,
+        btnNewWallet: true,
+        btnNewList: true,
+        btnEdit: true,
+        btnDelete: true,
+        btnRefresh: true
+    };
+    $scope.actionbar.refresh = function(clear){
+        $scope.actionbar.btnRefresh = false;
+        //ui.clear();
         $scope.grid.updateTransactions();
         $scope.grid.updateSummary();
     };
@@ -134,8 +150,33 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     $scope.actionbar.addWallet = function(){};
     $scope.actionbar.addList = function(){};
     $scope.actionbar.openTransaction = function( transactionId ){};
-    $scope.actionbar.removeTransaction = function( transactionId ){};
+    $scope.actionbar.removeTransaction = function(){
+        var transactionList = $scope.grid.getSelected();
+        
+        $scope.actionbar.btnDelete = false;
+        
+        try{
+            if (transactionList.length == 0){
+                throw new Error('TRANSACTION_GRID_YOU_SHALL_SELECT_AT_LAST_ONE');
+            }
+            
+            transactions.delete( transactionList ).then(function(response){
+                // success
+                $scope.actionbar.btnDelete = true;
+                $scope.actionbar.refresh();
+            }, function(err){
+                // error
+                ui.error(err);
+                $scope.actionbar.btnDelete = true;
+            });
+            
+        } catch (err) {
+            ui.error(err);
+            $scope.actionbar.btnDelete = true;
+        }
+        
+    };
     
     // start grid
-    $scope.grid.refresh();
+    $scope.actionbar.refresh();
 }]);

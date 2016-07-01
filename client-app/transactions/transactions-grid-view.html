@@ -18,25 +18,25 @@
                         <!-- toolbar -->
                         <div class="btn-group" role="group" aria-label="Ações">
                             <!-- dropdown group -->
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <div class="btn-group" uib-dropdown is-open="status.isopen">
+                                <button id="btn-new" type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="disabled">
                                     Nova <span class="caret"></span>
                                 </button>
-
-                                <ul class="dropdown-menu">
-                                  <li><a data-ng-click="action.addTransaction()">Nova transação</a></li>
-                                  <li role="separator" class="divider"></li>
-                                  <li><a data-ng-click="action.addWallet()">Nova carteira</a></li>
-                                  <li><a data-ng-click="action.addList()">Nova lista</a></li>
+                                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-new">
+                                    <li role="menuitem"><a href="#" data-ng-disabled="!actionbar.btnNewsTransaction" data-ng-click="actionbar.addTransaction()">Nova transação</a></li>
+                                    <li class="divider"></li>
+                                    <li role="menuitem"><a href="#" data-ng-disabled="!actionbar.btnNewsWallet" data-ng-click="actionbar.addWallet()">Nova carteira</a></li>
+                                    <li role="menuitem"><a href="#" data-ng-disabled="!actionbar.btnNewsList" data-ng-click="actionbar.addList()">Nova lista</a></li>
                                 </ul>
-                            </div> <!-- // dorpdown group -->
+                            </div>
+                            <!-- // dorpdown group -->
 
-                            <button type="button" data-ng-click="action.editTransaction()" class="btn btn-default">Editar</button>
-                            <button type="button" data-ng-click="action.removeTransaction()" class="btn btn-default btn-danger">Remover</button>
+                            <button type="button" data-ng-disabled="!actionbar.btnEdit" data-ng-click="actionbar.editTransaction()" class="btn btn-default">Editar</button>
+                            <button type="button" data-ng-disabled="!actionbar.btnDelete" data-ng-click="actionbar.removeTransaction()" class="btn btn-default btn-danger">Remover</button>
                         </div>
 
                         <div class="btn-group" role="group" aria-label="Ações">
-                            <button type="button" data-ng-click="action.refresh()" class="btn btn-default">Atualizar</button>
+                            <button type="button" data-ng-disabled="!actionbar.btnRefresh" data-ng-click="actionbar.refresh()" class="btn btn-default">Atualizar</button>
                         </div>
                         <!-- // toolbar -->
                     </div>
@@ -73,11 +73,11 @@
                             <tr>
                                 <td colspan="6">
                                     <ul class="pagination">
-                                        <li><a href="#">Página anterior</a></li>
+                                        <li><a data-ng-click="grid.previousPage()">Página anterior</a></li>
                                         
-                                        <li data-ng-repeat="page in pagination.getPages()"><a data-ng-click="grid.goToPage( page.index )" data-ng-class="{active: (page.index == pagination.page)}">{{page.label}}</a></li>
+                                        <!--<li data-ng-repeat="page in pagination.getPages()"><a data-ng-click="grid.goToPage( page.index )">{{page.label}}</a></li>-->
                                         
-                                        <li><a href="#">Próxima página</a></li>
+                                        <li><a data-ng-click="grid.nextPage()">Próxima página</a></li>
                                     </ul>
                                 </td>
                             </tr>

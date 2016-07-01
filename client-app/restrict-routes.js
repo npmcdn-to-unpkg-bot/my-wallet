@@ -17,7 +17,7 @@ app.config(function($routeProvider) {
 	controller : 'TransactionsGridController'
     })
     
-    .when('/transactions/transactionId', {
+    .when('/transactions/:transactionId', {
         templateUrl: '/app/transactions/transaction-view.html',
         controller: 'TransactionController'
     })
