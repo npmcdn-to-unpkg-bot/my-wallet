@@ -360,7 +360,7 @@ function deleteTransaction( req, res ){
                     if (err){
                         body.buildError(err);
                     } else {
-                        body.build();
+                        body.build({transaction_id: data});
                     }
                 });
             }

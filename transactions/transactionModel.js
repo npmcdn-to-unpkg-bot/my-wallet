@@ -82,7 +82,7 @@ Transaction.prototype.delete = function( next ){
             if (err){
                 next( new Error('ERROR_TRANSACTIONS_FAILURE_ON_REMOVE') );
             } else {
-                next();
+                next( false, transactionId );
             }
         });
         
