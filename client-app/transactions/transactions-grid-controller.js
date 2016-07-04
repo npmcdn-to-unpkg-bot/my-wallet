@@ -7,7 +7,7 @@
 
 var app = angular.module('myWallet.transactions');
 
-app.controller('TransactionsGridController', ['$scope', 'TransactionsService', 'UiMessagesService', function($scope, transactions, ui){
+app.controller('TransactionsGridController', ['$scope', '$q', 'TransactionsService', 'UiMessagesService', 'UiModalsService', function($scope, $q, transactions, ui, modals){
     
     // Page info
     $scope.page = {
@@ -46,7 +46,6 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     // private methods
     var _parseError = function(err){
         ui.error(err);
-        $scope.actionbar.btnRefresh = true;
     };
     
     var _parseTransactions = function(response){
@@ -57,9 +56,6 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
             $scope.pagination.items_per_page = response.data.pagination.page_records;
             
             $scope.grid.is_active = true;
-            $scope.actionbar.btnRefresh = true;
-            
-            ui.success('TRANSACTIONS_UPDATE_SUCCESS');
             
         } catch (err) {
             ui.error(err);
@@ -96,18 +92,64 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     
     // Load Summary
     $scope.grid.updateSummary = function(){
-        transactions.getSummary( $scope.filters ).then(_parseSummary, _parseError);
+        var q = $q.defer();
+        
+        transactions.getSummary( $scope.filters ).then(function(response){
+            _parseSummary(response);
+            q.resolve(true);
+        }, function(err){
+            q.reject(err);
+        });
+        
+        return q.promise;
     };
     
     // Load Grid
     $scope.grid.updateTransactions = function(){
+        var q = $q.defer();
         
         $scope.filters._page = $scope.pagination.page;
         
         // Disable grid
         $scope.grid.is_active = false;
         // Call api
-        transactions.getTransactions($scope.filters).then(_parseTransactions, _parseError);
+        transactions.getTransactions($scope.filters).then(function(response){
+            _parseTransactions(response);
+            q.resolve(true);
+        }, function(err){
+            q.reject(err);
+            $scope.grid.is_active = true;
+        });
+        
+        return q.promise;
+    };
+    
+    // Grid update
+    $scope.grid.update = function(){
+        var q = $q.defer();
+        var status = {
+            summary: false,
+            transactions: false,
+            check: function(){
+                if (this.summary && this.transactions){
+                    q.resolve(true);
+                }
+            },
+            fail: function(err){
+                q.reject(err);
+            }
+        };
+        
+        $scope.grid.updateSummary().then(function(response){
+            status.summary = true;
+            status.check();
+        }, status.fail);
+        $scope.grid.updateTransactions().then(function(response){
+            status.transactions = true;
+            status.check();
+        }, status.fail);
+        
+        return q.promise;
     };
     
     // Shortcuts
@@ -140,16 +182,67 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
         btnDelete: true,
         btnRefresh: true
     };
+    
     $scope.actionbar.refresh = function(clear){
         $scope.actionbar.btnRefresh = false;
-        //ui.clear();
-        $scope.grid.updateTransactions();
-        $scope.grid.updateSummary();
+        ui.clear();
+        $scope.grid.update().then(function(response){
+            $scope.actionbar.btnRefresh = true;
+            ui.success('TRANSACTIONS_UPDATE_SUCCESS');
+        }, function(err){
+            $scope.actionbar.btnRefresh = true;
+        });
     };
-    $scope.actionbar.addTransaction = function(){};
-    $scope.actionbar.addWallet = function(){};
-    $scope.actionbar.addList = function(){};
-    $scope.actionbar.openTransaction = function( transactionId ){};
+    
+    $scope.actionbar.addTransaction = function(){
+        var promise = modals.addModal({
+            controller: 'TransactionsSingleModalController',
+            template: '/app/transactions/transaction-single-modal-form-view.html',
+            data: { transaction: null }
+        });
+        
+        promise.then(function(){
+            $scope.grid.update();
+            ui.success("TRANSACTIONS_ADD_SUCCESS");
+        }, _parseError);
+    };
+    
+    $scope.actionbar.addWallet = function(){
+        var promise = modals.addModal({
+            controller: 'WalletsSingleModalController',
+            template: '/app/Wallets/wallet-single-modal-form-view.html',
+            data: { wallet: null }
+        });
+        
+        promise.then(function(){
+            $scope.grid.update();
+            ui.success("WALLETS_ADD_SUCCESS");
+        }, _parseError);
+    };
+    
+    $scope.actionbar.addList = function(){
+        var promise = modals.addModal({
+            controller: 'ListsSingleModalController',
+            template: '/app/lists/lists-single-modal-form-view.html',
+            data: { list: null }
+        });
+        
+        promise.then(function(){
+            $scope.grid.update();
+            ui.success("TRANSACTIONS_ADD_SUCCESS");
+        }, _parseError);
+    };
+    
+    $scope.actionbar.openTransaction = function( transactionId ){
+        var promise = modals.addModal({
+            controller: 'TransactionsSingleModalController',
+            template: '/app/transactions/add-transaction-modal-form-view.html',
+            data: { transaction: transactionId }
+        });
+        
+        promise.then(function(){}, _parseError);
+    };
+    
     $scope.actionbar.removeTransaction = function(){
         var transactionList = $scope.grid.getSelected();
         
@@ -178,5 +271,6 @@ app.controller('TransactionsGridController', ['$scope', 'TransactionsService', '
     };
     
     // start grid
-    $scope.actionbar.refresh();
+    $scope.grid.updateTransactions();
+    $scope.grid.updateSummary();
 }]);

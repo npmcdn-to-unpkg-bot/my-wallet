@@ -12,17 +12,45 @@ app.service('UiModalsService', ['$q', 'SessionsService', '$uibModal', function($
     this.addModal = function( modalData ){
         var q = $q.defer();
         
+        var resolver = {};
+        var modalConfig = {};
+        var resolverBuilder = function(data){
+            return function(){ return data; };
+        };
+        
         try{
+            if (!modalData.controller){
+                throw new Error('ERROR_UI_MODALS_INVALID_CONTROLLER');
+            }
             
-            // TODO
-            throw new Error('TODO_ERROR');
+            if (!modalData.template){
+                throw new Error('ERROR_UI_MODALS_INVALID_TEMPLATE');
+            }
             
+            if (modalData.data){
+                for (var x in modalData.data){
+                    resolver[x] = resolverBuilder(modalData.data[x]);
+                }
+                
+                modalConfig.resolve = resolver;
+            }
             
-        } catch(err) {
+            modalConfig.controller = modalData.controller;
+            modalConfig.templateUrl = modalData.template;
+            
+            $uibModal.open(modalConfig).result.then(function(response){
+                q.resolve(response);
+            }, function(err){
+                // error
+                q.reject(err);
+            });
+            
+        } catch (err) {
+            console.log(err.message);
             q.reject(err);
         }
         
-        return q;
+        return q.promise;
     };
     
     // Quick alias
