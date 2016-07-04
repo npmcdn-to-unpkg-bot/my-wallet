@@ -1,0 +1,65 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{page.title}}</h3>
+    <p data-ng-show="{page.description}">{{page.description}}</p>
+</div>
+<div class="modal-body">
+    <form id="addTransactionForm" data-ng-submit="save()" method="post" class="form transaction-form">
+        <div class="row">
+            <div class="col-sm-4">
+                <label class="control-label" for="transaction_description">Descrição:</label>
+            </div>
+            <div class="form-group col-sm-8">
+                <div class="input-group input-text">
+                    <input data-ng-model="data.transaction_description" type="text" class="form-control" name="transaction_description" id="transaction_description" placeholder="Supermercado">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-4">
+                <label class="control-label" for="transaction_data">Data:</label>
+            </div>
+            <div class="form-group col-sm-8">
+                <div class="input-group input-date">
+                    <span class="input-group-addon" id="addon-date">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                    <input data-ng-model="data.transaction_date_string" type="text" class="form-control" name="transaction_date" id="transaction_date" placeholder="DD / MM / YYYY">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-4">
+                <label class="control-label" for="transaction_wallet">Carteira:</label>
+            </div>
+            <div class="form-group col-sm-8">
+                <div class="input-group input-select">
+                    <select class="form-control" name="transaction_wallet" id="transaction_wallet">
+                        <option data-ng-repeat="{wallet in wallets}" data-ng-selected="wallet.id == transaction_wallet">{{wallet.name}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-4">
+                <label class="control-label" for="transaction_ammount">Valor:</label>
+            </div>
+            <div class="form-group col-sm-8">
+                <div class="input-group input-ammount">
+                    <span class="input-group-addon" id="addon-date">R$</span>
+                    <input data-ng-model="data.transaction_ammount" type="text" class="form-control" name="transaction_ammount" id="transaction_ammount">
+                </div>
+            </div>
+        </div>
+    </form>
+    
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="save()">Save</button>
+    <button class="btn btn-default" type="button" ng-click="cancel()">Cancel</button>
+</div>
+
+<pre>{{data}}</pre>
+<pre>{{formStatus}}</pre>
