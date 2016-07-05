@@ -7,7 +7,7 @@
 
 var app = angular.module('myWallet.ui');
 
-app.controller('TransactionsSingleModalController', [ '$scope', '$uibModalInstance', 'TransactionsService', 'WalletsService', 'transaction', function($scope, modal, transactions, wallets, transaction_id){
+app.controller('TransactionsSingleModalController', [ '$scope', '$q', '$uibModalInstance', 'TransactionsService', 'WalletsService', 'transaction', function($scope, $q, modal, transactions, wallets, transaction_id){
     
     $scope.page = {};
     $scope.page.title = (transaction_id==null)? 'Nova transação' : null;
@@ -30,13 +30,41 @@ app.controller('TransactionsSingleModalController', [ '$scope', '$uibModalInstan
     };
     
     var parseTransaction = function(response){
-        
+        $scope.data.transaction_ammount = response.transaction_ammount;
+        $scope.data.transaction_description = response.transaction_description;
+        $scope.data.transaction_wallet = response.wallet_id;
+        var tDate = response.transaction_date;
+        $scope.data.transaction_date_string = tDate.days + "/" + tDate.month + "/" + tDate.year;
     };
     
     $scope.save = function(){
         var data = {};
         
-        $scope.data;
+        var ammountRegex = /[\d\,\.]+/;
+        var dateRegex = /(\d{1,2})(?:\s)?\/(?:\s)?(\d{1,2})(?:\s)\/(?:\s)(\d{2,4})/;
+        var parseDate;
+        
+        if (!ammountRegex.test($scope.data.transaction_ammount)){
+            throw new Error('ERROR_TRANSACTION_INVALID_AMMOUNT');
+        }
+        
+        if (!dateRegex.test($scope.data.transaction_date_string)){
+            throw new Error('ERROR_TRANSACTION_INVALID_AMMOUNT');
+        }
+        
+        parseDate = dateRegex.exec($scope.data.transaction_date_string);
+        
+        data.transaction_ammount = $scope.data.transaction_ammount.replace('.', ',');
+        data.transaction_description = $scope.data.transaction_description;
+        data.wallet_id = $scope.data.transaction_wallet;
+        data.trasaction_date = {
+            day: parseDate[1],
+            month: parseDate[2],
+            year: parseDate[3],
+            hour: 0,
+            minute: 0,
+            seconds: 0
+        };
         
         transactions.save(data).then(function(response){
             parseTransaction(response);
